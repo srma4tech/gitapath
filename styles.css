@@ -1,0 +1,396 @@
+body {
+  font-family: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  background-color: #070b1a;
+  background-image:
+    linear-gradient(180deg, rgba(7, 11, 26, 0.72), rgba(17, 28, 69, 0.82)),
+    url("./assets/images/krishna-aura-bg.png");
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.site-header {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.7rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(214, 178, 94, 0.24);
+  border-radius: 1rem;
+  background-image:
+    linear-gradient(160deg, rgba(4, 8, 24, 0.72), rgba(8, 14, 33, 0.5)),
+    radial-gradient(circle at top center, rgba(214, 178, 94, 0.24), transparent 55%);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.26);
+  backdrop-filter: blur(8px);
+}
+
+.site-header h1 {
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+.site-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.site-header-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 0.8rem;
+}
+
+.site-header-actions nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.page-title {
+  margin: 0;
+  text-align: center;
+  font-size: 0.86rem;
+  line-height: 1.35;
+  letter-spacing: 0.045em;
+  font-weight: 700;
+  color: #d9c79a;
+}
+
+.site-footer {
+  margin-top: 1.25rem;
+  border-top: 1px solid rgba(214, 178, 94, 0.3);
+  background-image:
+    linear-gradient(180deg, rgba(4, 8, 24, 0.4), rgba(4, 8, 24, 0.65)),
+    radial-gradient(circle at top center, rgba(214, 178, 94, 0.18), transparent 58%);
+  text-align: center;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 8px;
+  z-index: 50;
+  background: #f0ddb1;
+  color: #1b2740;
+  border-radius: 999px;
+  padding: 0.5rem 0.9rem;
+  font-weight: 600;
+}
+
+.skip-link:focus {
+  left: 12px;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid #f0ddb1;
+  outline-offset: 2px;
+}
+
+body.theme-dark {
+  color: #f4e6c4;
+}
+
+body.theme-light {
+  color: #1b2740;
+  background-image:
+    linear-gradient(180deg, rgba(245, 234, 208, 0.62), rgba(230, 219, 188, 0.7)),
+    url("./assets/images/krishna-aura-bg.png");
+}
+
+body.theme-light .site-header {
+  border-color: rgba(146, 104, 28, 0.26);
+  background-image:
+    linear-gradient(160deg, rgba(247, 239, 215, 0.94), rgba(237, 226, 197, 0.9)),
+    radial-gradient(circle at top center, rgba(173, 132, 57, 0.16), transparent 55%);
+  box-shadow: 0 14px 28px rgba(84, 61, 20, 0.15);
+}
+
+body.theme-light .site-footer {
+  border-top-color: rgba(146, 104, 28, 0.28);
+  background-image:
+    linear-gradient(180deg, rgba(244, 232, 204, 0.56), rgba(233, 220, 190, 0.76)),
+    radial-gradient(circle at top center, rgba(173, 132, 57, 0.16), transparent 58%);
+}
+
+body.theme-light .site-header h1,
+body.theme-light .site-header a,
+body.theme-light .site-header p {
+  color: #2a334d !important;
+}
+
+body.theme-light .page-title {
+  color: #334969 !important;
+}
+
+body.theme-light .site-header #install-btn {
+  border-color: rgba(146, 104, 28, 0.45);
+  color: #2a334d;
+  background: rgba(255, 245, 220, 0.85);
+}
+
+@media (display-mode: standalone) {
+  body {
+    background-image:
+      linear-gradient(180deg, rgba(7, 11, 26, 0.7), rgba(17, 28, 69, 0.7)),
+      url("./assets/images/splash-gradient.jpeg"),
+      url("./assets/images/krishna-aura-bg.png");
+  }
+}
+
+.sanskrit-text {
+  font-family: "Nirmala UI", "Mangal", "Kokila", serif;
+  letter-spacing: 0.01em;
+}
+
+#welcome-screen {
+  min-height: 220px;
+  background-image:
+    linear-gradient(145deg, rgba(3, 8, 26, 0.82), rgba(7, 14, 41, 0.68)),
+    url("./assets/images/kurukshetra-sunrise-bg.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+body.theme-light #welcome-screen {
+  background-image:
+    linear-gradient(145deg, rgba(241, 229, 198, 0.78), rgba(233, 219, 184, 0.62)),
+    url("./assets/images/kurukshetra-sunrise-bg.png");
+}
+
+#daily-screen {
+  background-image:
+    linear-gradient(180deg, rgba(8, 13, 35, 0.22), rgba(8, 13, 35, 0.34)),
+    url("./assets/images/krishna-aura-bg.png");
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: cover;
+  border-radius: 1.5rem;
+  padding: 0.5rem;
+}
+
+body.theme-light #daily-screen {
+  background-image:
+    linear-gradient(180deg, rgba(241, 231, 205, 0.38), rgba(241, 231, 205, 0.56)),
+    url("./assets/images/krishna-aura-bg.png");
+}
+
+#verse-card {
+  min-height: clamp(560px, 70vh, 880px);
+  background-image:
+    linear-gradient(140deg, rgba(16, 12, 5, 0.6), rgba(5, 8, 17, 0.72)),
+    url("./assets/images/parchment-texture.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+#verse-sanskrit {
+  line-height: 1.65;
+  letter-spacing: 0.01em;
+}
+
+#verse-translit {
+  line-height: 1.75;
+}
+
+#verse-meaning {
+  line-height: 1.75;
+  letter-spacing: 0.002em;
+}
+
+#verse-reflection {
+  line-height: 1.8;
+}
+
+.reading-content h2 {
+  line-height: 1.28;
+  letter-spacing: 0.01em;
+}
+
+.reading-content h3 {
+  line-height: 1.35;
+  letter-spacing: 0.006em;
+}
+
+.reading-content p,
+.reading-content li {
+  line-height: 1.9;
+  letter-spacing: 0.004em;
+}
+
+.reading-content p {
+  max-width: 70ch;
+}
+
+body.theme-light #verse-card {
+  background-image:
+    linear-gradient(140deg, rgba(250, 244, 226, 0.84), rgba(239, 230, 204, 0.84)),
+    url("./assets/images/parchment-texture.png");
+}
+
+body.theme-light #verse-meta,
+body.theme-light #verse-sanskrit,
+body.theme-light #verse-translit,
+body.theme-light #verse-meaning,
+body.theme-light #verse-reflection,
+body.theme-light #share-status,
+body.theme-light #speech-status {
+  color: #1b2a43 !important;
+}
+
+body.theme-light #verse-translit {
+  color: #2f3f5d !important;
+}
+
+body.theme-light .section-kicker {
+  color: #324765 !important;
+  font-weight: 700;
+}
+
+body.theme-light #verse-reflection {
+  border-color: rgba(146, 104, 28, 0.3);
+  background-image:
+    radial-gradient(circle at top right, rgba(197, 148, 52, 0.16), transparent 52%),
+    linear-gradient(180deg, rgba(235, 216, 170, 0.5), rgba(232, 212, 166, 0.38));
+}
+
+body.theme-light #streak-card,
+body.theme-light #settings-card {
+  background: linear-gradient(145deg, rgba(41, 49, 68, 0.92), rgba(54, 64, 90, 0.88));
+  border-color: rgba(255, 228, 166, 0.4);
+}
+
+body.theme-light #streak-card p,
+body.theme-light #settings-card p,
+body.theme-light #settings-card button {
+  color: #f6edd7;
+}
+
+body.theme-light #settings-card button.bg-gp-gold {
+  color: #1f1908;
+}
+
+#verse-reflection {
+  background-image:
+    radial-gradient(circle at top right, rgba(214, 178, 94, 0.25), transparent 50%),
+    linear-gradient(180deg, rgba(214, 178, 94, 0.11), rgba(214, 178, 94, 0.06));
+}
+
+.control-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.4rem;
+  min-width: 7.2rem;
+  padding: 0.45rem 0.9rem !important;
+  gap: 0.42rem;
+  font-weight: 600;
+  font-size: 0.84rem !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+}
+
+body.theme-dark .control-chip {
+  color: #f7e7bd !important;
+  border-color: rgba(230, 194, 104, 0.62) !important;
+  background-image: linear-gradient(145deg, rgba(16, 23, 48, 0.92), rgba(25, 17, 9, 0.78)) !important;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+}
+
+body.theme-light .control-chip {
+  color: #243451 !important;
+  border-color: rgba(146, 104, 28, 0.45) !important;
+  background-image: linear-gradient(145deg, rgba(255, 248, 229, 0.96), rgba(244, 231, 199, 0.9)) !important;
+  box-shadow: 0 4px 10px rgba(116, 82, 24, 0.14);
+}
+
+.section-kicker {
+  font-weight: 700;
+}
+
+body.theme-dark .section-kicker {
+  color: #e4d8b2 !important;
+}
+
+#streak-card {
+  overflow: hidden;
+  position: relative;
+}
+
+#streak-card.milestone-active::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.55;
+  background-image:
+    linear-gradient(170deg, rgba(5, 9, 24, 0.48), rgba(5, 9, 24, 0.12)),
+    url("./assets/images/kurukshetra-sunrise-bg.png");
+  background-position: center;
+  background-size: cover;
+}
+
+#streak-card.milestone-active::after {
+  content: "";
+  position: absolute;
+  inset: -15%;
+  pointer-events: none;
+  opacity: 0.55;
+  background-image: url("./assets/images/golden-celebration-glow.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  animation: milestoneGlow 3.2s ease-in-out infinite;
+}
+
+@keyframes milestoneGlow {
+  0%, 100% { transform: scale(1); opacity: 0.45; }
+  50% { transform: scale(1.05); opacity: 0.75; }
+}
+
+@media (max-width: 640px) {
+  .site-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .site-header-top {
+    width: 100%;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .site-header-actions {
+    align-items: center;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .site-header-actions nav {
+    justify-content: center;
+  }
+
+  #verse-card {
+    min-height: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

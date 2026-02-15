@@ -1,0 +1,16 @@
+{
+  "name": "gitapath",
+  "version": "1.0.0",
+  "description": "GitaPath is a production-ready Progressive Web App that delivers one Bhagavad Gita verse per day with:",
+  "main": "sw.js",
+  "scripts": {
+    "build:css": "tailwindcss -i ./tailwind.input.css -o ./tailwind.css --minify",
+    "test": "echo \"No test suite configured\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}

@@ -1,0 +1,170 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0a1026" />
+  <meta name="description" content="Read one Bhagavad Gita verse daily with deep spiritual meaning in Hindi and English, then grow your devotional consistency with a simple streak tracker." />
+  <meta name="robots" content="index,follow,max-image-preview:large" />
+  <meta name="author" content="GitaPath" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="GitaPath - Daily Bhagavad Gita Verse, Meaning & Spiritual Streak Tracker" />
+  <meta property="og:description" content="Read one Bhagavad Gita verse daily with deep spiritual meaning in Hindi and English, then track your streak and stay consistent in sadhana." />
+  <meta property="og:image" content="/assets/images/share-card-light.jpeg" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:url" content="./" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="GitaPath - Daily Bhagavad Gita Verse, Meaning & Spiritual Streak Tracker" />
+  <meta name="twitter:description" content="Daily Bhagavad Gita verse with Hindi-English meanings, reflection, and devotional streak tracking." />
+  <meta name="twitter:image" content="/assets/images/share-card-light.jpeg" />
+  <link rel="canonical" href="./" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="preload" href="./assets/images/krishna-aura-bg.png" as="image" />
+  <link rel="icon" type="image/jpeg" href="./assets/images/app-icon.jpeg" />
+  <link rel="apple-touch-icon" href="./assets/images/app-icon.jpeg" />
+  <link rel="apple-touch-startup-image" href="./assets/images/splash-gradient.jpeg" />
+  <title>GitaPath - Daily Bhagavad Gita Verse, Meaning & Spiritual Streak Tracker</title>
+  <link rel="stylesheet" href="./tailwind.css" />
+  <link rel="stylesheet" href="./styles.css" />
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "name": "GitaPath",
+          "url": "./",
+          "description": "Read one Bhagavad Gita verse daily with deep meaning in Hindi and English and track your spiritual streak."
+        },
+        {
+          "@type": "MobileApplication",
+          "name": "GitaPath",
+          "applicationCategory": "LifestyleApplication",
+          "operatingSystem": "Android, iOS, Web",
+          "url": "./",
+          "description": "A progressive web app for daily Bhagavad Gita verses, meanings, reflection, and streak tracking."
+        }
+      ]
+    }
+  </script>
+</head>
+<body class="min-h-screen text-white selection:bg-gp-gold/25">
+  <a href="#daily-screen" class="skip-link">Skip to daily verse</a>
+  <div class="pointer-events-none fixed inset-0 opacity-40">
+    <div class="absolute -top-20 -left-20 h-72 w-72 rounded-full bg-gp-gold blur-3xl"></div>
+    <div class="absolute right-0 top-1/3 h-72 w-72 rounded-full bg-[#6e7cf7] blur-3xl"></div>
+  </div>
+
+  <main class="relative z-10 mx-auto flex min-h-screen w-full max-w-4xl flex-col px-4 pb-10 pt-6 sm:px-6">
+    <header class="site-header mb-6">
+      <div class="site-header-top">
+        <h1 class="text-2xl font-semibold tracking-wide text-gp-goldSoft sm:text-3xl">GitaPath</h1>
+        <div class="site-header-actions">
+          <nav aria-label="Primary navigation" class="flex flex-wrap justify-center gap-3 text-xs text-gp-goldSoft/90">
+            <a href="./about-gita.html" class="hover:text-white">About Gita</a>
+            <a href="./read-gita-daily.html" class="hover:text-white">Read Daily</a>
+            <a href="./benefits-of-gita.html" class="hover:text-white">Benefits</a>
+          </nav>
+          <button id="install-btn" type="button" aria-label="Install GitaPath app" class="rounded-full border border-gp-gold/50 bg-black/20 px-4 py-2 text-sm text-gp-goldSoft hover:bg-black/35">
+            Install App
+          </button>
+        </div>
+      </div>
+      <p class="page-title">Daily Bhagavad Gita Verse, Meaning & Spiritual Streak Tracker</p>
+    </header>
+
+    <section id="welcome-screen" aria-labelledby="welcome-title" class="rounded-3xl border border-white/10 bg-black/30 p-6 shadow-card backdrop-blur-md animate-fadeIn">
+      <h2 id="welcome-title" class="mb-2 text-2xl font-semibold text-gp-goldSoft">Welcome to your daily Gita journey</h2>
+      <p class="mb-5 text-sm text-white/80 sm:text-base">
+        Receive one Bhagavad Gita verse each day, reflect deeply, and grow your spiritual streak with steady practice.
+      </p>
+      <ul class="mb-5 list-disc space-y-1 pl-5 text-sm text-white/85">
+        <li>Daily Sanskrit verse and transliteration.</li>
+        <li>Hindi and English meaning toggle.</li>
+        <li>Spiritual streak milestones to build consistency.</li>
+      </ul>
+      <button id="start-btn" type="button" class="rounded-full bg-gp-gold px-5 py-2.5 font-medium text-[#201a0b] hover:brightness-105">
+        Begin Today's Path
+      </button>
+    </section>
+
+    <section id="daily-screen" aria-labelledby="verse-meta" class="hidden animate-fadeIn">
+      <div class="mb-4 grid gap-3 sm:grid-cols-2">
+        <article id="streak-card" class="rounded-2xl border border-gp-gold/35 bg-black/35 p-4 shadow-glow backdrop-blur-md animate-pulseGlow">
+          <p class="text-xs uppercase tracking-wider text-gp-goldSoft/80">Streak</p>
+          <div class="mt-2 flex items-end gap-3">
+            <p class="text-4xl font-semibold text-gp-goldSoft" id="current-streak">1</p>
+            <p class="pb-1 text-sm text-white/75">days current</p>
+          </div>
+          <p class="mt-2 text-sm text-white/70">Longest: <span id="longest-streak">1</span> days</p>
+          <p id="milestone-badge" class="mt-2 hidden rounded-lg bg-gp-gold/20 px-2 py-1 text-xs text-gp-goldSoft"></p>
+        </article>
+
+        <article id="settings-card" class="rounded-2xl border border-white/10 bg-black/30 p-4 backdrop-blur-md">
+          <p class="text-xs uppercase tracking-wider text-white/65">Display language</p>
+          <div role="group" aria-label="Display language" class="mt-3 inline-flex rounded-full border border-white/15 p-1">
+            <button id="lang-en" type="button" aria-pressed="true" class="rounded-full px-4 py-1.5 text-sm bg-gp-gold text-[#1f1908]">English</button>
+            <button id="lang-hi" type="button" aria-pressed="false" class="rounded-full px-4 py-1.5 text-sm text-white/85">Hindi</button>
+          </div>
+          <p class="mt-4 text-xs uppercase tracking-wider text-white/65">Appearance</p>
+          <div role="group" aria-label="Appearance theme" class="mt-3 inline-flex rounded-full border border-white/15 p-1">
+            <button id="theme-dark" type="button" aria-pressed="true" class="rounded-full px-4 py-1.5 text-sm bg-gp-gold text-[#1f1908]">Dark</button>
+            <button id="theme-light" type="button" aria-pressed="false" class="rounded-full px-4 py-1.5 text-sm text-white/85">Light</button>
+          </div>
+          <p class="mt-3 text-xs text-white/60">Sanskrit and transliteration are always shown.</p>
+          <p class="mt-1 text-xs text-white/60">Appearance also applies to share card style.</p>
+        </article>
+      </div>
+
+      <article id="verse-card" class="rounded-3xl border border-white/10 bg-black/35 p-5 shadow-card backdrop-blur-md sm:p-8">
+        <div class="mb-4 flex items-center justify-between gap-3">
+          <p id="verse-meta" class="text-xs uppercase tracking-widest text-gp-goldSoft/80"></p>
+          <button id="speak-shloka-btn" type="button" aria-label="Speak shloka" class="control-chip rounded-full border border-gp-gold/45 bg-black/20 px-3 py-1.5 text-xs text-gp-goldSoft hover:bg-black/35">
+            &#128266; Shloka
+          </button>
+        </div>
+        <p id="verse-sanskrit" class="sanskrit-text text-lg leading-relaxed text-gp-goldSoft sm:text-2xl"></p>
+        <p id="verse-translit" class="mt-4 text-sm italic leading-relaxed text-white/80 sm:text-base"></p>
+        <div class="mt-6 flex items-center justify-between gap-3">
+          <p class="section-kicker text-xs uppercase tracking-widest text-white/70">Meaning & Reflection</p>
+          <button id="speak-desc-btn" type="button" aria-label="Speak meaning and reflection" class="control-chip rounded-full border border-gp-gold/45 bg-black/20 px-3 py-1.5 text-xs text-gp-goldSoft hover:bg-black/35">
+            &#128266; Explain
+          </button>
+        </div>
+        <p id="verse-meaning" class="mt-6 text-base leading-relaxed text-white/90 sm:text-lg"></p>
+        <p id="verse-reflection" class="mt-6 rounded-2xl border border-gp-gold/20 bg-gp-gold/10 p-4 text-sm leading-relaxed text-white/90 sm:text-base"></p>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <button id="share-btn" type="button" class="rounded-full bg-gp-gold px-5 py-2 text-sm font-medium text-[#1f1908] hover:brightness-105">
+            Share Verse
+          </button>
+          <button id="download-btn" type="button" class="rounded-full border border-gp-gold/45 bg-black/20 px-5 py-2 text-sm text-gp-goldSoft hover:bg-black/35">
+            Download Card
+          </button>
+        </div>
+        <p id="share-status" role="status" aria-live="polite" class="mt-3 text-xs text-white/70"></p>
+        <p id="speech-status" role="status" aria-live="polite" class="mt-1 text-xs text-white/70"></p>
+      </article>
+    </section>
+  </main>
+  <footer class="site-footer relative z-10 px-4 py-4 text-center text-xs text-white/70 sm:px-6">
+    <p>&copy; 2026 GitaPath by srma4tech. Daily Gita practice for a steady life.</p>
+    <p class="mt-1">
+      <a class="text-gp-goldSoft hover:text-white" href="./about-gita.html">About</a>
+      <span class="mx-1">|</span>
+      <a class="text-gp-goldSoft hover:text-white" href="./read-gita-daily.html">Read Daily</a>
+      <span class="mx-1">|</span>
+      <a class="text-gp-goldSoft hover:text-white" href="./benefits-of-gita.html">Benefits</a>
+    </p>
+  </footer>
+
+  <img id="share-light-template" src="./assets/images/share-card-light.jpeg" decoding="async" alt="GitaPath light share card background template" width="1080" height="1080" class="hidden" />
+  <img id="share-dark-template" src="./assets/images/share-card-dark.jpeg" decoding="async" alt="GitaPath dark share card background template" width="1080" height="1080" class="hidden" />
+  <img id="share-parchment-template" src="./assets/images/parchment-texture.png" decoding="async" alt="Parchment texture used in GitaPath share cards" width="1080" height="1080" class="hidden" />
+  <canvas id="share-canvas" class="hidden" width="1080" height="1080"></canvas>
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
+
+

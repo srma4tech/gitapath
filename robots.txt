@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://srma4tech.github.io/gitapath/sitemap.xml

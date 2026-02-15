@@ -1,0 +1,13 @@
+Launching today on Product Hunt: GitaPath
+
+GitaPath is a free, installable PWA for daily Bhagavad Gita practice.
+- 1 verse per day from all 700 verses
+- Sanskrit + transliteration
+- Hindi and English meanings
+- Reflection + streak tracking
+- Works offline after first load
+
+Try it here:
+https://YOUR_GITHUB_USERNAME.github.io/gitapath/
+
+If it helps your daily sadhana, your support and feedback would mean a lot.
