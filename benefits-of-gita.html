@@ -9,12 +9,12 @@
   <meta property="og:type" content="article" />
   <meta property="og:title" content="Benefits of Reading Bhagavad Gita Daily" />
   <meta property="og:description" content="Understand how daily Gita reading supports mental clarity, resilience, relationships, and values-based living." />
-  <meta property="og:image" content="/assets/images/share-card-light.jpeg" />
+  <meta property="og:image" content="https://srma4tech.github.io/gitapath/assets/images/share-card-light.jpeg" />
   <meta property="og:url" content="https://srma4tech.github.io/gitapath/benefits-of-gita.html" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Benefits of Reading Bhagavad Gita Daily" />
   <meta name="twitter:description" content="Practical benefits of consistent Bhagavad Gita study in modern life." />
-  <meta name="twitter:image" content="/assets/images/share-card-light.jpeg" />
+  <meta name="twitter:image" content="https://srma4tech.github.io/gitapath/assets/images/share-card-light.jpeg" />
   <link rel="canonical" href="https://srma4tech.github.io/gitapath/benefits-of-gita.html" />
   <link rel="manifest" href="./manifest.json" />
   <link rel="stylesheet" href="./tailwind.css" />
@@ -31,10 +31,33 @@
             <a class="text-gp-goldSoft hover:text-white" href="./about-gita.html">About Gita</a>
             <a class="text-gp-goldSoft hover:text-white" href="./read-gita-daily.html">Read Daily</a>
           </nav>
+          <button id="menu-toggle" type="button" aria-label="Open profile and app menu" class="welcome-trigger">
+            <img class="user-avatar user-avatar-sm" src="./assets/images/app-icon.jpeg" alt="User avatar" />
+            <span>
+              <span class="user-welcome">Welcome</span>
+              <span class="user-name">Seeker</span>
+            </span>
+          </button>
         </div>
       </div>
       <p class="page-title">Benefits of Reading the Bhagavad Gita Daily</p>
     </header>
+    <div id="menu-modal-overlay" class="menu-modal-overlay hidden" aria-hidden="true"></div>
+    <aside id="menu-modal" class="menu-modal hidden" role="dialog" aria-modal="true" aria-label="App menu">
+      <button id="menu-close" type="button" class="menu-close-btn" aria-label="Close menu">X</button>
+      <div class="side-menu-profile">
+        <img class="user-avatar" src="./assets/images/app-icon.jpeg" alt="User avatar" />
+        <p class="user-welcome">Welcome</p>
+        <p class="user-name">Seeker</p>
+      </div>
+      <nav class="side-menu-nav" aria-label="Quick links">
+        <a href="./index.html">Home</a>
+        <a href="./about-gita.html">About Gita</a>
+        <a href="./read-gita-daily.html">Read Daily</a>
+        <a href="./benefits-of-gita.html">Benefits</a>
+        <a href="./profile.html">Add/Edit Profile</a>
+      </nav>
+    </aside>
 
     <article class="reading-content rounded-3xl border border-white/10 bg-black/35 p-6 shadow-card backdrop-blur-md sm:p-8">
       <img src="./assets/images/parchment-texture.png" alt="Parchment style sacred texture representing wisdom literature" loading="lazy" width="1400" height="900" class="mb-6 w-full rounded-2xl border border-white/10 object-cover" />
@@ -130,5 +153,6 @@
       <a class="text-gp-goldSoft hover:text-white" href="./read-gita-daily.html">Read Daily</a>
     </p>
   </footer>
+  <script type="module" src="./js/profile.js"></script>
 </body>
 </html>

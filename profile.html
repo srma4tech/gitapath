@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile Settings | GitaPath</title>
+  <meta name="description" content="Set your name and avatar for personalized GitaPath sharing cards. Stored only on your device." />
+  <meta name="robots" content="index,follow,max-image-preview:large" />
+  <link rel="canonical" href="https://srma4tech.github.io/gitapath/profile.html" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="stylesheet" href="./tailwind.css" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body class="theme-dark min-h-screen text-white">
+  <main class="relative z-10 mx-auto w-full max-w-4xl px-4 pb-12 pt-6 sm:px-6">
+    <header class="site-header mb-6">
+      <div class="site-header-top">
+        <h1 class="text-2xl font-semibold tracking-wide text-gp-goldSoft sm:text-3xl">GitaPath</h1>
+        <div class="site-header-actions">
+          <nav aria-label="Primary navigation" class="flex flex-wrap justify-center gap-3 text-xs text-gp-goldSoft/90">
+            <a href="./index.html" class="hover:text-white">Home</a>
+            <a href="./about-gita.html" class="hover:text-white">About Gita</a>
+            <a href="./read-gita-daily.html" class="hover:text-white">Read Daily</a>
+            <a href="./benefits-of-gita.html" class="hover:text-white">Benefits</a>
+          </nav>
+          <button id="menu-toggle" type="button" aria-label="Open profile and app menu" class="welcome-trigger">
+            <img class="user-avatar user-avatar-sm" src="./assets/images/app-icon.jpeg" alt="User avatar" />
+            <span>
+              <span class="user-welcome">Welcome</span>
+              <span class="user-name">Seeker</span>
+            </span>
+          </button>
+        </div>
+      </div>
+      <p class="page-title">Profile Settings</p>
+    </header>
+
+    <div id="menu-modal-overlay" class="menu-modal-overlay hidden" aria-hidden="true"></div>
+    <aside id="menu-modal" class="menu-modal hidden" role="dialog" aria-modal="true" aria-label="App menu">
+      <button id="menu-close" type="button" class="menu-close-btn" aria-label="Close menu">X</button>
+      <div class="side-menu-profile">
+        <img class="user-avatar" src="./assets/images/app-icon.jpeg" alt="User avatar" />
+        <p class="user-welcome">Welcome</p>
+        <p class="user-name">Seeker</p>
+      </div>
+      <nav class="side-menu-nav" aria-label="Quick links">
+        <a href="./index.html">Home</a>
+        <a href="./about-gita.html">About Gita</a>
+        <a href="./read-gita-daily.html">Read Daily</a>
+        <a href="./benefits-of-gita.html">Benefits</a>
+        <a href="./profile.html">Add/Edit Profile</a>
+      </nav>
+    </aside>
+
+    <section class="profile-panel rounded-3xl border border-white/10 bg-black/35 p-6 shadow-card backdrop-blur-md sm:p-8">
+      <h2 class="mb-2 text-2xl text-gp-goldSoft">Personalize Your Share Card</h2>
+      <p class="mb-6 text-sm text-white/80">
+        Your details stay only on this device. They are used for card sharing and downloads.
+      </p>
+
+      <form id="profile-form" class="profile-form space-y-4">
+        <div>
+          <label for="profile-form-name" class="mb-1 block text-sm text-white/85">Your Name</label>
+          <input id="profile-form-name" type="text" maxlength="40" placeholder="Enter your name" class="w-full rounded-lg border border-white/20 bg-black/25 px-3 py-2 text-sm text-white placeholder:text-white/45" />
+        </div>
+        <div>
+          <label for="profile-form-photo" class="mb-1 block text-sm text-white/85">Profile Photo</label>
+          <input id="profile-form-photo" type="file" accept="image/*" class="block w-full text-xs text-white/75 file:mr-3 file:rounded-full file:border-0 file:bg-gp-gold/80 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-[#1f1908]" />
+        </div>
+        <div class="flex items-center gap-3">
+          <img id="profile-form-preview" src="" alt="Profile preview" class="user-avatar hidden" />
+          <button id="profile-form-remove-photo" type="button" class="rounded-full border border-white/30 bg-black/20 px-3 py-1.5 text-xs text-white/80 hover:bg-black/35">Remove Photo</button>
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <button type="submit" class="rounded-full bg-gp-gold px-5 py-2 text-sm font-medium text-[#1f1908] hover:brightness-105">Save Profile</button>
+          <a href="./index.html" class="rounded-full border border-gp-gold/45 bg-black/20 px-5 py-2 text-sm text-gp-goldSoft hover:bg-black/35">Back to Home</a>
+        </div>
+        <p id="profile-form-status" role="status" aria-live="polite" class="text-xs text-white/75"></p>
+      </form>
+    </section>
+  </main>
+
+  <footer class="site-footer relative z-10 px-4 py-4 text-center text-xs text-white/70 sm:px-6">
+    <p>&copy; 2026 GitaPath by srma4tech.</p>
+    <p class="mt-1">
+      <a class="text-gp-goldSoft hover:text-white" href="./index.html">Home</a>
+      <span class="mx-1">|</span>
+      <a class="text-gp-goldSoft hover:text-white" href="./about-gita.html">About</a>
+      <span class="mx-1">|</span>
+      <a class="text-gp-goldSoft hover:text-white" href="./read-gita-daily.html">Read Daily</a>
+    </p>
+  </footer>
+  <script type="module" src="./js/profile.js"></script>
+</body>
+</html>

@@ -6,11 +6,17 @@ import { registerServiceWorker, setupInstallPrompt } from "./pwa.js";
 const startedKey = "gitapath_started";
 const languageKey = "gitapath_language";
 const appearanceKey = "gitapath_appearance";
+const profileKey = "gitapath_profile";
+const reminderKey = "gitapath_reminder";
+const reminderLastSentKey = "gitapath_reminder_last_sent";
+const appFallbackUrl = "https://srma4tech.github.io/gitapath/";
 
 const welcomeScreen = document.getElementById("welcome-screen");
 const dailyScreen = document.getElementById("daily-screen");
 const startButton = document.getElementById("start-btn");
 const installButton = document.getElementById("install-btn");
+const shareAppButton = document.getElementById("share-app-btn");
+const headerShareStatus = document.getElementById("header-share-status");
 const langEnButton = document.getElementById("lang-en");
 const langHiButton = document.getElementById("lang-hi");
 const themeDarkButton = document.getElementById("theme-dark");
@@ -31,12 +37,19 @@ const currentStreakEl = document.getElementById("current-streak");
 const longestStreakEl = document.getElementById("longest-streak");
 const milestoneBadge = document.getElementById("milestone-badge");
 const streakCard = document.getElementById("streak-card");
+const reminderEnabledInput = document.getElementById("reminder-enabled");
+const reminderTimeInput = document.getElementById("reminder-time");
+const saveReminderButton = document.getElementById("save-reminder-btn");
+const testReminderButton = document.getElementById("test-reminder-btn");
+const reminderStatus = document.getElementById("reminder-status");
 
 const requiredElements = [
   ["welcome-screen", welcomeScreen],
   ["daily-screen", dailyScreen],
   ["start-btn", startButton],
   ["install-btn", installButton],
+  ["share-app-btn", shareAppButton],
+  ["header-share-status", headerShareStatus],
   ["lang-en", langEnButton],
   ["lang-hi", langHiButton],
   ["theme-dark", themeDarkButton],
@@ -56,7 +69,12 @@ const requiredElements = [
   ["current-streak", currentStreakEl],
   ["longest-streak", longestStreakEl],
   ["milestone-badge", milestoneBadge],
-  ["streak-card", streakCard]
+  ["streak-card", streakCard],
+  ["reminder-enabled", reminderEnabledInput],
+  ["reminder-time", reminderTimeInput],
+  ["save-reminder-btn", saveReminderButton],
+  ["test-reminder-btn", testReminderButton],
+  ["reminder-status", reminderStatus]
 ];
 
 const chapterReflectionFocusHi = {
@@ -84,6 +102,7 @@ let language = localStorage.getItem(languageKey) || "en";
 let appearance = localStorage.getItem(appearanceKey) || "dark";
 let todayVerse = null;
 let activeSpeechTarget = null;
+let reminderTimeoutId = null;
 
 function normalizeText(value) {
   return String(value || "").replace(/\s+/g, " ").trim();
@@ -93,8 +112,24 @@ function setShareStatus(message) {
   shareStatus.textContent = message;
 }
 
+function setHeaderShareStatus(message) {
+  headerShareStatus.textContent = message;
+}
+
+function setReminderStatus(message) {
+  reminderStatus.textContent = message;
+}
+
 function setSpeechStatus(message) {
   speechStatus.textContent = message;
+}
+
+function getAppUrl() {
+  try {
+    return new URL("./", window.location.href).href;
+  } catch (error) {
+    return appFallbackUrl;
+  }
 }
 
 function applyLanguageToggleUi() {
@@ -140,9 +175,133 @@ function getLocalizedReflection(verse) {
   return `\u092f\u0939 \u0936\u094d\u0932\u094b\u0915 \u0939\u092e\u0947\u0902 ${focus} \u092a\u0930 \u092e\u0928\u0928 \u0915\u0930\u0928\u0947 \u0915\u0947 \u0932\u093f\u090f \u092a\u094d\u0930\u0947\u0930\u093f\u0924 \u0915\u0930\u0924\u093e \u0939\u0948\u0964 \u0907\u0938\u0947 \u0936\u093e\u0902\u0924\u093f \u0938\u0947 \u092a\u0922\u093c\u0947\u0902, \u0905\u092a\u0928\u0947 \u0935\u0930\u094d\u0924\u092e\u093e\u0928 \u0915\u0930\u094d\u0924\u0935\u094d\u092f \u0915\u094b \u092c\u093f\u0928\u093e \u092d\u092f \u0915\u0947 \u0926\u0947\u0916\u0947\u0902, \u0914\u0930 \u0915\u0930\u094d\u092e \u0915\u094b \u0938\u0947\u0935\u093e-\u092d\u093e\u0935 \u0938\u0947 \u0915\u0930\u0947\u0902\u0964 \u091c\u092c \u0905\u0939\u0902\u0915\u093e\u0930 \u0938\u0947 \u0939\u091f\u0915\u0930 \u0938\u092e\u0930\u094d\u092a\u0923 \u0906\u0924\u093e \u0939\u0948, \u0924\u092c \u0935\u093f\u0935\u0947\u0915, \u0927\u0948\u0930\u094d\u092f \u0914\u0930 \u0906\u0927\u094d\u092f\u093e\u0924\u094d\u092e\u093f\u0915 \u092a\u094d\u0930\u0917\u0924\u093f \u0938\u094d\u0935\u093e\u092d\u093e\u0935\u093f\u0915 \u0930\u0942\u092a \u0938\u0947 \u092c\u0922\u093c\u0924\u0940 \u0939\u0948\u0964`;
 }
 
+function readProfileFromStorage() {
+  try {
+    const raw = localStorage.getItem(profileKey);
+    if (!raw) {
+      return { name: "", photoDataUrl: "" };
+    }
+    const parsed = JSON.parse(raw);
+    return {
+      name: normalizeText(parsed.name || "").slice(0, 40),
+      photoDataUrl: normalizeText(parsed.photoDataUrl || "")
+    };
+  } catch (error) {
+    return { name: "", photoDataUrl: "" };
+  }
+}
+
+function getProfileForShare() {
+  const profile = readProfileFromStorage();
+  if (!profile.name && !profile.photoDataUrl) {
+    return null;
+  }
+  return profile;
+}
+
+function readReminderFromStorage() {
+  try {
+    const raw = localStorage.getItem(reminderKey);
+    if (!raw) {
+      return { enabled: false, time: "06:30" };
+    }
+    const parsed = JSON.parse(raw);
+    const time = /^\d{2}:\d{2}$/.test(parsed.time) ? parsed.time : "06:30";
+    return { enabled: Boolean(parsed.enabled), time };
+  } catch (error) {
+    return { enabled: false, time: "06:30" };
+  }
+}
+
+function persistReminder(reminder) {
+  localStorage.setItem(reminderKey, JSON.stringify(reminder));
+}
+
+async function showReminderNotification() {
+  const dateKey = getDateKey(new Date());
+  if (localStorage.getItem(reminderLastSentKey) === dateKey) {
+    return;
+  }
+
+  const body = "Your daily Gita verse is ready. Read with meaning and reflection.";
+  try {
+    let didNotify = false;
+    if ("serviceWorker" in navigator) {
+      const registration = await navigator.serviceWorker.getRegistration();
+      if (registration) {
+        await registration.showNotification("GitaPath Reminder", {
+          body,
+          icon: "./assets/images/app-icon.jpeg",
+          badge: "./assets/images/app-icon.jpeg",
+          data: { url: getAppUrl() }
+        });
+        didNotify = true;
+      } else if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("GitaPath Reminder", { body, icon: "./assets/images/app-icon.jpeg" });
+        didNotify = true;
+      }
+    } else if ("Notification" in window && Notification.permission === "granted") {
+      new Notification("GitaPath Reminder", { body, icon: "./assets/images/app-icon.jpeg" });
+      didNotify = true;
+    }
+    if (didNotify) {
+      localStorage.setItem(reminderLastSentKey, dateKey);
+    }
+  } catch (error) {
+    setReminderStatus("Could not show notification in this browser.");
+  }
+}
+
+function scheduleReminderTimer(reminder) {
+  if (reminderTimeoutId) {
+    clearTimeout(reminderTimeoutId);
+    reminderTimeoutId = null;
+  }
+
+  if (!reminder.enabled) {
+    return;
+  }
+
+  const [hours, minutes] = reminder.time.split(":").map((part) => Number(part));
+  if (!Number.isInteger(hours) || !Number.isInteger(minutes)) {
+    return;
+  }
+
+  const now = new Date();
+  const next = new Date(now);
+  next.setHours(hours, minutes, 0, 0);
+  if (next <= now) {
+    next.setDate(next.getDate() + 1);
+  }
+
+  const delay = Math.max(1000, next.getTime() - now.getTime());
+  reminderTimeoutId = window.setTimeout(async () => {
+    await showReminderNotification();
+    scheduleReminderTimer(readReminderFromStorage());
+  }, delay);
+}
+
+async function maybeSendReminderOnLaunch(reminder) {
+  if (!reminder.enabled) {
+    return;
+  }
+  const [hours, minutes] = reminder.time.split(":").map((part) => Number(part));
+  if (!Number.isInteger(hours) || !Number.isInteger(minutes)) {
+    return;
+  }
+  const now = new Date();
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const reminderMinutes = hours * 60 + minutes;
+  if (nowMinutes >= reminderMinutes) {
+    await showReminderNotification();
+  }
+}
+
 function resetSpeechButtons() {
-  speakShlokaButton.innerHTML = "&#128266; Shloka";
-  speakDescButton.innerHTML = "&#128266; Explain";
+  speakShlokaButton.textContent = "Shloka";
+  speakDescButton.textContent = "Explain";
+  speakShlokaButton.classList.remove("is-speaking");
+  speakDescButton.classList.remove("is-speaking");
 }
 
 function stopSpeech() {
@@ -157,10 +316,12 @@ function stopSpeech() {
 function applySpeechButtonState(target, speaking) {
   resetSpeechButtons();
   if (speaking && target === "shloka") {
-    speakShlokaButton.innerHTML = "&#9208; Stop";
+    speakShlokaButton.textContent = "Stop";
+    speakShlokaButton.classList.add("is-speaking");
   }
   if (speaking && target === "desc") {
-    speakDescButton.innerHTML = "&#9208; Stop";
+    speakDescButton.textContent = "Stop";
+    speakDescButton.classList.add("is-speaking");
   }
 }
 
@@ -257,7 +418,14 @@ function setupShareButtons() {
       return;
     }
 
-    const blob = await buildShareCard(shareCanvas, todayVerse, language, appearance);
+    const blob = await buildShareCard(
+      shareCanvas,
+      todayVerse,
+      language,
+      appearance,
+      getProfileForShare(),
+      getLocalizedReflection(todayVerse)
+    );
     if (!blob) {
       setShareStatus("Could not prepare share card right now.");
       return;
@@ -284,13 +452,120 @@ function setupShareButtons() {
       return;
     }
 
-    const blob = await buildShareCard(shareCanvas, todayVerse, language, appearance);
+    const blob = await buildShareCard(
+      shareCanvas,
+      todayVerse,
+      language,
+      appearance,
+      getProfileForShare(),
+      getLocalizedReflection(todayVerse)
+    );
     if (!blob) {
       setShareStatus("Could not prepare download card right now.");
       return;
     }
     downloadBlob(blob, todayVerse);
     setShareStatus("Card downloaded.");
+  });
+}
+
+async function ensureNotificationPermission() {
+  if (!("Notification" in window)) {
+    setReminderStatus("Notifications are not supported in this browser.");
+    return false;
+  }
+  if (Notification.permission === "granted") {
+    return true;
+  }
+  if (Notification.permission === "denied") {
+    setReminderStatus("Notifications are blocked. Enable them in browser settings.");
+    return false;
+  }
+  const permission = await Notification.requestPermission();
+  if (permission !== "granted") {
+    setReminderStatus("Notification permission is required for reminders.");
+    return false;
+  }
+  return true;
+}
+
+function setupReminderControls() {
+  const reminder = readReminderFromStorage();
+  reminderEnabledInput.checked = reminder.enabled;
+  reminderTimeInput.value = reminder.time;
+  scheduleReminderTimer(reminder);
+  maybeSendReminderOnLaunch(reminder);
+
+  saveReminderButton.addEventListener("click", async () => {
+    const nextReminder = {
+      enabled: Boolean(reminderEnabledInput.checked),
+      time: /^\d{2}:\d{2}$/.test(reminderTimeInput.value) ? reminderTimeInput.value : "06:30"
+    };
+
+    if (nextReminder.enabled) {
+      const granted = await ensureNotificationPermission();
+      if (!granted) {
+        reminderEnabledInput.checked = false;
+        nextReminder.enabled = false;
+      }
+    }
+
+    persistReminder(nextReminder);
+    scheduleReminderTimer(nextReminder);
+    setReminderStatus(nextReminder.enabled
+      ? `Reminder saved for ${nextReminder.time} daily.`
+      : "Reminder disabled.");
+  });
+
+  testReminderButton.addEventListener("click", async () => {
+    const granted = await ensureNotificationPermission();
+    if (!granted) {
+      return;
+    }
+    await showReminderNotification();
+    localStorage.removeItem(reminderLastSentKey);
+    setReminderStatus("Test notification sent.");
+  });
+}
+
+function setupShareAppButton() {
+  shareAppButton.addEventListener("click", async () => {
+    const appUrl = getAppUrl();
+    const shareMessage = [
+      "Begin your day with one Bhagavad Gita verse on GitaPath.",
+      "Read Sanskrit, Hindi/English meaning, reflection, and grow your spiritual streak.",
+      "",
+      `Start here: ${appUrl}`
+    ].join("\n");
+    const payload = {
+      title: "GitaPath",
+      text: shareMessage
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(payload);
+        setHeaderShareStatus("App link shared.");
+        return;
+      } catch (error) {
+        if (error && error.name === "AbortError") {
+          setHeaderShareStatus("Share cancelled.");
+          return;
+        }
+      }
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      try {
+        await navigator.clipboard.writeText(appUrl);
+        setHeaderShareStatus("App link copied.");
+        return;
+      } catch (error) {
+        // Ignore and fallback to manual copy instructions below.
+      }
+    }
+
+    setHeaderShareStatus(`Copy and share: ${appUrl}`);
   });
 }
 
@@ -355,10 +630,12 @@ async function boot() {
 
   registerServiceWorker();
   setupInstallPrompt(installButton);
+  setupShareAppButton();
   setupLanguageButtons();
   setupAppearanceButtons();
   setupSpeechButtons();
   setupShareButtons();
+  setupReminderControls();
   applyLanguageToggleUi();
   applyAppearanceUi();
   resetSpeechButtons();

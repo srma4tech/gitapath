@@ -11,13 +11,13 @@
   <meta property="og:type" content="website" />
   <meta property="og:title" content="GitaPath - Daily Bhagavad Gita Verse, Meaning & Spiritual Streak Tracker" />
   <meta property="og:description" content="Read one Bhagavad Gita verse daily with deep spiritual meaning in Hindi and English, then track your streak and stay consistent in sadhana." />
-  <meta property="og:image" content="/assets/images/share-card-light.jpeg" />
+  <meta property="og:image" content="https://srma4tech.github.io/gitapath/assets/images/share-card-light.jpeg" />
   <meta property="og:locale" content="en_US" />
   <meta property="og:url" content="https://srma4tech.github.io/gitapath/" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="GitaPath - Daily Bhagavad Gita Verse, Meaning & Spiritual Streak Tracker" />
   <meta name="twitter:description" content="Daily Bhagavad Gita verse with Hindi-English meanings, reflection, and devotional streak tracking." />
-  <meta name="twitter:image" content="/assets/images/share-card-light.jpeg" />
+  <meta name="twitter:image" content="https://srma4tech.github.io/gitapath/assets/images/share-card-light.jpeg" />
   <link rel="canonical" href="https://srma4tech.github.io/gitapath/" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -68,13 +68,60 @@
             <a href="./read-gita-daily.html" class="hover:text-white">Read Daily</a>
             <a href="./benefits-of-gita.html" class="hover:text-white">Benefits</a>
           </nav>
-          <button id="install-btn" type="button" aria-label="Install GitaPath app" class="rounded-full border border-gp-gold/50 bg-black/20 px-4 py-2 text-sm text-gp-goldSoft hover:bg-black/35">
-            Install App
+          <div class="header-action-buttons">
+            <button id="share-app-btn" type="button" aria-label="Share GitaPath app" class="rounded-full border border-gp-gold/50 bg-black/20 px-4 py-2 text-sm text-gp-goldSoft hover:bg-black/35">
+              Share App
+            </button>
+            <button id="install-btn" type="button" aria-label="Install GitaPath app" class="rounded-full border border-gp-gold/50 bg-black/20 px-4 py-2 text-sm text-gp-goldSoft hover:bg-black/35">
+              Install App
+            </button>
+          </div>
+          <button id="menu-toggle" type="button" aria-label="Open profile and app menu" class="welcome-trigger">
+            <img class="user-avatar user-avatar-sm" src="./assets/images/app-icon.jpeg" alt="User avatar" />
+            <span>
+              <span class="user-welcome">Welcome</span>
+              <span class="user-name">Seeker</span>
+            </span>
           </button>
         </div>
       </div>
       <p class="page-title">Daily Bhagavad Gita Verse, Meaning & Spiritual Streak Tracker</p>
+      <p id="header-share-status" role="status" aria-live="polite" class="text-center text-xs text-white/70"></p>
     </header>
+    <div id="menu-modal-overlay" class="menu-modal-overlay hidden" aria-hidden="true"></div>
+    <aside id="menu-modal" class="menu-modal hidden" role="dialog" aria-modal="true" aria-label="App menu">
+      <button id="menu-close" type="button" class="menu-close-btn" aria-label="Close menu">X</button>
+      <div class="side-menu-profile">
+        <img class="user-avatar" src="./assets/images/app-icon.jpeg" alt="User avatar" />
+        <p class="user-welcome">Welcome</p>
+        <p class="user-name">Seeker</p>
+      </div>
+      <nav class="side-menu-nav" aria-label="Quick links">
+        <a href="./index.html">Home</a>
+        <a href="./about-gita.html">About Gita</a>
+        <a href="./read-gita-daily.html">Read Daily</a>
+        <a href="./benefits-of-gita.html">Benefits</a>
+        <a href="./profile.html">Add/Edit Profile</a>
+        <button id="menu-open-reminder" type="button" class="menu-link-button">Reminder Settings</button>
+      </nav>
+    </aside>
+
+    <div id="reminder-modal-overlay" class="menu-modal-overlay hidden" aria-hidden="true"></div>
+    <aside id="reminder-modal" class="menu-modal reminder-modal hidden" role="dialog" aria-modal="true" aria-label="Reminder settings">
+      <button id="reminder-modal-close" type="button" class="menu-close-btn" aria-label="Close reminder settings">X</button>
+      <h2 class="reminder-title text-xl text-gp-goldSoft">Daily Reminder</h2>
+      <p class="reminder-subtitle mt-1 text-xs text-white/75">Set your preferred time for daily Gita notification.</p>
+      <label class="reminder-toggle mt-4 inline-flex items-center gap-2 text-sm text-white/85">
+        <input id="reminder-enabled" type="checkbox" class="h-4 w-4 rounded border-white/30 bg-black/20" />
+        Enable reminder
+      </label>
+      <div class="reminder-actions mt-3 flex flex-wrap items-center gap-2">
+        <input id="reminder-time" type="time" value="06:30" class="rounded-lg border border-white/20 bg-black/25 px-3 py-2 text-sm text-white" />
+        <button id="save-reminder-btn" type="button" class="rounded-full border border-gp-gold/45 bg-black/20 px-3 py-1.5 text-xs text-gp-goldSoft hover:bg-black/35">Save Reminder</button>
+        <button id="test-reminder-btn" type="button" class="rounded-full border border-white/25 bg-black/20 px-3 py-1.5 text-xs text-white/80 hover:bg-black/35">Test</button>
+      </div>
+      <p id="reminder-status" role="status" aria-live="polite" class="reminder-status mt-2 text-xs text-white/70"></p>
+    </aside>
 
     <section id="welcome-screen" aria-labelledby="welcome-title" class="rounded-3xl border border-white/10 bg-black/30 p-6 shadow-card backdrop-blur-md animate-fadeIn">
       <h2 id="welcome-title" class="mb-2 text-2xl font-semibold text-gp-goldSoft">Welcome to your daily Gita journey</h2>
@@ -116,6 +163,7 @@
           </div>
           <p class="mt-3 text-xs text-white/60">Sanskrit and transliteration are always shown.</p>
           <p class="mt-1 text-xs text-white/60">Appearance also applies to share card style.</p>
+
         </article>
       </div>
 
@@ -123,7 +171,7 @@
         <div class="mb-4 flex items-center justify-between gap-3">
           <p id="verse-meta" class="text-xs uppercase tracking-widest text-gp-goldSoft/80"></p>
           <button id="speak-shloka-btn" type="button" aria-label="Speak shloka" class="control-chip rounded-full border border-gp-gold/45 bg-black/20 px-3 py-1.5 text-xs text-gp-goldSoft hover:bg-black/35">
-            &#128266; Shloka
+            Shloka
           </button>
         </div>
         <p id="verse-sanskrit" class="sanskrit-text text-lg leading-relaxed text-gp-goldSoft sm:text-2xl"></p>
@@ -131,7 +179,7 @@
         <div class="mt-6 flex items-center justify-between gap-3">
           <p class="section-kicker text-xs uppercase tracking-widest text-white/70">Meaning & Reflection</p>
           <button id="speak-desc-btn" type="button" aria-label="Speak meaning and reflection" class="control-chip rounded-full border border-gp-gold/45 bg-black/20 px-3 py-1.5 text-xs text-gp-goldSoft hover:bg-black/35">
-            &#128266; Explain
+            Explain
           </button>
         </div>
         <p id="verse-meaning" class="mt-6 text-base leading-relaxed text-white/90 sm:text-lg"></p>
@@ -164,6 +212,7 @@
   <img id="share-dark-template" src="./assets/images/share-card-dark.jpeg" decoding="async" alt="GitaPath dark share card background template" width="1080" height="1080" class="hidden" />
   <img id="share-parchment-template" src="./assets/images/parchment-texture.png" decoding="async" alt="Parchment texture used in GitaPath share cards" width="1080" height="1080" class="hidden" />
   <canvas id="share-canvas" class="hidden" width="1080" height="1080"></canvas>
+  <script type="module" src="./js/profile.js"></script>
   <script type="module" src="./js/app.js"></script>
 </body>
 </html>

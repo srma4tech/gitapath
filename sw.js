@@ -1,4 +1,4 @@
-const CACHE_NAME = "gitapath-v11";
+const CACHE_NAME = "gitapath-v25";
 
 const CORE_ASSETS = [
   "./",
@@ -6,6 +6,7 @@ const CORE_ASSETS = [
   "./about-gita.html",
   "./read-gita-daily.html",
   "./benefits-of-gita.html",
+  "./profile.html",
   "./404.html",
   "./robots.txt",
   "./sitemap.xml",
@@ -17,6 +18,7 @@ const CORE_ASSETS = [
   "./js/streak.js",
   "./js/share.js",
   "./js/pwa.js",
+  "./js/profile.js",
   "./data/verses.json",
   "./assets/images/krishna-aura-bg.png",
   "./assets/images/kurukshetra-sunrise-bg.png",
@@ -94,4 +96,22 @@ self.addEventListener("fetch", (event) => {
   }
 
   event.respondWith(networkFirst(event.request));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const targetUrl = (event.notification.data && event.notification.data.url) || "./";
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url && client.url.includes("/gitapath")) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
+      return Promise.resolve();
+    })
+  );
 });

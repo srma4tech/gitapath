@@ -1,4 +1,4 @@
-const CARD_WIDTH = 1080;
+﻿const CARD_WIDTH = 1080;
 const CARD_HEIGHT = 1080;
 
 function normalizeText(value) {
@@ -57,6 +57,27 @@ function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
   return y + lines.length * lineHeight;
 }
 
+function drawLines(ctx, lines, x, y, lineHeight) {
+  for (let i = 0; i < lines.length; i += 1) {
+    ctx.fillText(lines[i], x, y + i * lineHeight);
+  }
+  return y + lines.length * lineHeight;
+}
+
+function fitTextSingleLine(ctx, text, maxWidth) {
+  let value = normalizeText(text);
+  if (!value) {
+    return "";
+  }
+  if (ctx.measureText(value).width <= maxWidth) {
+    return value;
+  }
+  while (value.length > 0 && ctx.measureText(`${value}...`).width > maxWidth) {
+    value = value.slice(0, -1);
+  }
+  return `${value}...`;
+}
+
 function drawCoverImage(ctx, image, width, height, alpha = 1) {
   if (!image || image.naturalWidth <= 0 || image.naturalHeight <= 0) {
     return;
@@ -106,7 +127,19 @@ async function ensureImageReady(image) {
   return image;
 }
 
-export async function buildShareCard(canvas, verse, language, appearance = "dark") {
+async function loadImageFromDataUrl(dataUrl) {
+  if (!dataUrl) {
+    return null;
+  }
+  return new Promise((resolve) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => resolve(null);
+    image.src = dataUrl;
+  });
+}
+
+export async function buildShareCard(canvas, verse, language, appearance = "dark", profile = null, reflectionOverride = "") {
   const ctx = canvas.getContext("2d");
   canvas.width = CARD_WIDTH;
   canvas.height = CARD_HEIGHT;
@@ -148,6 +181,13 @@ export async function buildShareCard(canvas, verse, language, appearance = "dark
   const textAccent = appearance === "light" ? "rgba(146,104,28,0.95)" : "rgba(214,178,94,0.95)";
   const panelFill = appearance === "light" ? "rgba(248,242,225,0.78)" : "rgba(5,9,24,0.62)";
   const borderStroke = appearance === "light" ? "rgba(155,113,45,0.62)" : "rgba(214,178,94,0.56)";
+  const chapterLabel = language === "hi" ? "अध्याय" : "Chapter";
+  const verseLabel = language === "hi" ? "श्लोक" : "Verse";
+  const meaningLabel = language === "hi" ? "अर्थ" : "Meaning";
+  const reflectionLabel = language === "hi" ? "मनन" : "Reflection";
+  const footerLine = language === "hi"
+    ? "दैनिक श्लोक. दैनिक चिंतन. दैनिक साधना."
+    : "Daily verse. Daily reflection. Daily alignment.";
 
   ctx.fillStyle = "rgba(214, 178, 94, 0.16)";
   ctx.beginPath();
@@ -173,21 +213,86 @@ export async function buildShareCard(canvas, verse, language, appearance = "dark
 
   ctx.fillStyle = textSecondary;
   ctx.font = "500 27px Cinzel, Georgia, serif";
-  ctx.fillText(`Chapter ${verse.chapter} \u2022 Verse ${verse.verse}`, 96, 176);
+  ctx.fillText(`${chapterLabel} ${verse.chapter} \u2022 ${verseLabel} ${verse.verse}`, 96, 176);
 
-  let cursorY = 248;
   const contentX = 96;
   const contentWidth = CARD_WIDTH - 192;
+  const contentTop = 248;
+  const maxContentBottom = 900;
 
+  const meaning = language === "hi" ? verse.hindiMeaning : verse.englishMeaning;
+  const reflection = normalizeText(reflectionOverride) || (language === "hi"
+    ? normalizeText(verse.hindiReflection || verse.reflection)
+    : normalizeText(verse.reflection));
+
+  function buildLayout(scale) {
+    const sanskritSize = Math.round(50 * scale);
+    const sanskritLine = Math.round(62 * scale);
+    const translitSize = Math.round(33 * scale);
+    const translitLine = Math.round(46 * scale);
+    const labelSize = Math.round(26 * scale);
+    const bodySize = Math.round(38 * scale);
+    const bodyLine = Math.round(52 * scale);
+    const reflectionSize = Math.round(32 * scale);
+    const reflectionLine = Math.round(46 * scale);
+
+    ctx.font = `500 ${sanskritSize}px 'Nirmala UI', serif`;
+    const sanskritLines = wrapLines(ctx, verse.sanskrit, contentWidth, Number.POSITIVE_INFINITY);
+    ctx.font = `italic 400 ${translitSize}px Georgia, serif`;
+    const translitLines = wrapLines(ctx, verse.transliteration, contentWidth, Number.POSITIVE_INFINITY);
+    ctx.font = `400 ${bodySize}px Georgia, serif`;
+    const meaningLines = wrapLines(ctx, meaning, contentWidth, Number.POSITIVE_INFINITY);
+    ctx.font = `400 ${reflectionSize}px Georgia, serif`;
+    const reflectionLines = wrapLines(ctx, reflection, contentWidth, Number.POSITIVE_INFINITY);
+
+    let y = contentTop;
+    y += sanskritLines.length * sanskritLine;
+    y += Math.round(16 * scale);
+    y += translitLines.length * translitLine;
+    y += Math.round(16 * scale);
+    y += Math.round(36 * scale);
+    y += Math.round(42 * scale);
+    y += meaningLines.length * bodyLine;
+    y += Math.round(20 * scale);
+    y += Math.round(40 * scale);
+    y += reflectionLines.length * reflectionLine;
+
+    return {
+      scale,
+      sanskritSize,
+      sanskritLine,
+      translitSize,
+      translitLine,
+      labelSize,
+      bodySize,
+      bodyLine,
+      reflectionSize,
+      reflectionLine,
+      sanskritLines,
+      translitLines,
+      meaningLines,
+      reflectionLines,
+      endY: y
+    };
+  }
+
+  let layout = buildLayout(1);
+  for (let scale = 0.97; layout.endY > maxContentBottom && scale >= 0.5; scale -= 0.02) {
+    layout = buildLayout(Number(scale.toFixed(2)));
+  }
+
+  let cursorY = contentTop;
+
+  ctx.fillStyle = textAccent;
   ctx.fillStyle = textPrimary;
-  ctx.font = "500 50px 'Nirmala UI', serif";
-  cursorY = drawWrappedText(ctx, verse.sanskrit, contentX, cursorY, contentWidth, 62, 4);
-  cursorY += 16;
+  ctx.font = `500 ${layout.sanskritSize}px 'Nirmala UI', serif`;
+  cursorY = drawLines(ctx, layout.sanskritLines, contentX, cursorY, layout.sanskritLine);
+  cursorY += Math.round(16 * layout.scale);
 
   ctx.fillStyle = textSecondary;
-  ctx.font = "italic 400 33px Georgia, serif";
-  cursorY = drawWrappedText(ctx, verse.transliteration, contentX, cursorY, contentWidth, 46, 2);
-  cursorY += 16;
+  ctx.font = `italic 400 ${layout.translitSize}px Georgia, serif`;
+  cursorY = drawLines(ctx, layout.translitLines, contentX, cursorY, layout.translitLine);
+  cursorY += Math.round(16 * layout.scale);
 
   ctx.strokeStyle = borderStroke;
   ctx.lineWidth = 1.5;
@@ -195,38 +300,92 @@ export async function buildShareCard(canvas, verse, language, appearance = "dark
   ctx.moveTo(contentX, cursorY);
   ctx.lineTo(contentX + contentWidth, cursorY);
   ctx.stroke();
-  cursorY += 36;
-
-  const meaning = language === "hi" ? verse.hindiMeaning : verse.englishMeaning;
-  const reflection = language === "hi"
-    ? normalizeText(verse.hindiReflection || verse.reflection)
-    : normalizeText(verse.reflection);
+  cursorY += Math.round(36 * layout.scale);
 
   ctx.fillStyle = textAccent;
-  ctx.font = "600 26px Cinzel, Georgia, serif";
-  ctx.fillText(language === "hi" ? "Arth" : "Meaning", contentX, cursorY);
-  cursorY += 42;
+  ctx.font = `600 ${layout.labelSize}px Cinzel, Georgia, serif`;
+  ctx.fillText(meaningLabel, contentX, cursorY);
+  cursorY += Math.round(42 * layout.scale);
 
   ctx.fillStyle = textBody;
-  ctx.font = "400 38px Georgia, serif";
-  cursorY = drawWrappedText(ctx, meaning, contentX, cursorY, contentWidth, 52, 5);
-  cursorY += 20;
+  ctx.font = `400 ${layout.bodySize}px Georgia, serif`;
+  cursorY = drawLines(ctx, layout.meaningLines, contentX, cursorY, layout.bodyLine);
+  cursorY += Math.round(20 * layout.scale);
 
   ctx.fillStyle = textAccent;
-  ctx.font = "600 26px Cinzel, Georgia, serif";
-  ctx.fillText(language === "hi" ? "Manan" : "Reflection", contentX, cursorY);
-  cursorY += 40;
+  ctx.font = `600 ${layout.labelSize}px Cinzel, Georgia, serif`;
+  ctx.fillText(reflectionLabel, contentX, cursorY);
+  cursorY += Math.round(40 * layout.scale);
 
   ctx.fillStyle = textSecondary;
-  ctx.font = "400 32px Georgia, serif";
-  drawWrappedText(ctx, reflection, contentX, cursorY, contentWidth, 46, 3);
+  ctx.font = `400 ${layout.reflectionSize}px Georgia, serif`;
+  drawLines(ctx, layout.reflectionLines, contentX, cursorY, layout.reflectionLine);
 
   ctx.fillStyle = textAccent;
   ctx.font = "500 24px Cinzel, Georgia, serif";
-  ctx.fillText("Daily verse. Daily reflection. Daily alignment.", 96, 964);
+  ctx.fillText(footerLine, 96, 964);
   ctx.font = "400 19px Georgia, serif";
   ctx.fillStyle = textSecondary;
   ctx.fillText("srma4tech.github.io/gitapath", 96, 996);
+
+  const profileName = normalizeText(profile && profile.name ? profile.name : "");
+  const profilePhotoData = profile && profile.photoDataUrl ? profile.photoDataUrl : "";
+  if (profileName || profilePhotoData) {
+    const badgeWidth = 300;
+    const badgeHeight = 76;
+    const badgeX = CARD_WIDTH - badgeWidth - 84;
+    const badgeY = 92;
+
+    ctx.fillStyle = appearance === "light" ? "rgba(255, 250, 237, 0.92)" : "rgba(8, 12, 31, 0.75)";
+    ctx.strokeStyle = borderStroke;
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    if (typeof ctx.roundRect === "function") {
+      ctx.roundRect(badgeX, badgeY, badgeWidth, badgeHeight, 20);
+      ctx.fill();
+      ctx.stroke();
+    } else {
+      ctx.fillRect(badgeX, badgeY, badgeWidth, badgeHeight);
+      ctx.strokeRect(badgeX, badgeY, badgeWidth, badgeHeight);
+    }
+
+    let textX = badgeX + 18;
+    if (profilePhotoData) {
+      const avatar = await loadImageFromDataUrl(profilePhotoData);
+      if (avatar) {
+        const avatarSize = 52;
+        const avatarX = badgeX + 14;
+        const avatarY = badgeY + (badgeHeight - avatarSize) / 2;
+        const avatarScale = Math.max(avatarSize / avatar.width, avatarSize / avatar.height);
+        const avatarDrawWidth = avatar.width * avatarScale;
+        const avatarDrawHeight = avatar.height * avatarScale;
+        const avatarDrawX = avatarX + (avatarSize - avatarDrawWidth) / 2;
+        const avatarDrawY = avatarY + (avatarSize - avatarDrawHeight) / 2;
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(avatarX + avatarSize / 2, avatarY + avatarSize / 2, avatarSize / 2, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+        ctx.drawImage(avatar, avatarDrawX, avatarDrawY, avatarDrawWidth, avatarDrawHeight);
+        ctx.restore();
+        ctx.strokeStyle = borderStroke;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(avatarX + avatarSize / 2, avatarY + avatarSize / 2, avatarSize / 2, 0, Math.PI * 2);
+        ctx.stroke();
+        textX = avatarX + avatarSize + 14;
+      }
+    }
+
+    const fittedName = fitTextSingleLine(ctx, profileName || "GitaPath Reader", 182);
+
+    ctx.fillStyle = textAccent;
+    ctx.font = "500 18px Cinzel, Georgia, serif";
+    ctx.fillText(language === "hi" ? "प्रेषक" : "Shared by", textX, badgeY + 32);
+    ctx.fillStyle = textPrimary;
+    ctx.font = "600 22px Georgia, serif";
+    ctx.fillText(fittedName, textX, badgeY + 58);
+  }
 
   return new Promise((resolve) => {
     canvas.toBlob((blob) => resolve(blob), "image/png");
@@ -242,17 +401,29 @@ export async function shareVerseImage(blob, verse, language) {
   const shareText = language === "hi"
     ? `\u0906\u091c \u0915\u093e \u0917\u0940\u0924\u093e \u0936\u094d\u0932\u094b\u0915: \u0905\u0927\u094d\u092f\u093e\u092f ${verse.chapter}, \u0936\u094d\u0932\u094b\u0915 ${verse.verse}`
     : `Today's Gita verse: Chapter ${verse.chapter}, Verse ${verse.verse}`;
+  const appUrl = (() => {
+    try {
+      return new URL("./", window.location.href).href;
+    } catch (error) {
+      return "https://srma4tech.github.io/gitapath/";
+    }
+  })();
+  const linkLabel = language === "hi" ? "\u0917\u0940\u0924\u093e\u092a\u0925 \u0932\u093f\u0902\u0915" : "GitaPath link";
+  const meaningText = language === "hi" ? verse.hindiMeaning : verse.englishMeaning;
+  const shareInvite = language === "hi"
+    ? `\u0930\u094b\u091c\u093c \u090f\u0915 \u0917\u0940\u0924\u093e \u0936\u094d\u0932\u094b\u0915 \u092a\u0922\u093c\u0947\u0902, \u0905\u0930\u094d\u0925 \u0914\u0930 \u091a\u093f\u0902\u0924\u0928 \u0915\u0947 \u0938\u093e\u0925\u0964`
+    : "Read one Bhagavad Gita verse daily with meaning and reflection.";
   const isWindows = /Windows/i.test(navigator.userAgent || "");
   const sharePayloadText = {
     title: "GitaPath Daily Verse",
-    text: `${shareText}\n\n${language === "hi" ? verse.hindiMeaning : verse.englishMeaning}`
+    text: `${shareText}\n\n${meaningText}\n\n${shareInvite}\n${linkLabel}: ${appUrl}`
   };
 
   // File-sharing works well on most non-Windows targets.
   if (!isWindows && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
     await navigator.share({
       title: "GitaPath Daily Verse",
-      text: shareText,
+      text: `${shareText}\n\n${shareInvite}\n${linkLabel}: ${appUrl}`,
       files: [file]
     });
     return "shared";
@@ -291,3 +462,5 @@ export function downloadBlob(blob, verse) {
   anchor.remove();
   URL.revokeObjectURL(url);
 }
+
+
