@@ -1,30 +1,60 @@
 const CARD_WIDTH = 1080;
 const CARD_HEIGHT = 1080;
 
-function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
-  const words = text.replace(/\s+/g, " ").trim().split(" ");
-  let line = "";
-  let lines = 0;
+function normalizeText(value) {
+  return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+function wrapLines(ctx, text, maxWidth, maxLines) {
+  const cleanText = normalizeText(text);
+  if (!cleanText) {
+    return [];
+  }
+
+  const words = cleanText.split(" ");
+  const lines = [];
+  let currentLine = "";
 
   for (let i = 0; i < words.length; i += 1) {
-    const testLine = line ? `${line} ${words[i]}` : words[i];
-    const testWidth = ctx.measureText(testLine).width;
-    if (testWidth > maxWidth && line) {
-      ctx.fillText(line, x, y);
-      y += lineHeight;
-      lines += 1;
-      line = words[i];
-      if (lines >= maxLines - 1) {
-        break;
-      }
+    const candidate = currentLine ? `${currentLine} ${words[i]}` : words[i];
+    if (ctx.measureText(candidate).width <= maxWidth) {
+      currentLine = candidate;
+      continue;
+    }
+
+    if (currentLine) {
+      lines.push(currentLine);
     } else {
-      line = testLine;
+      lines.push(words[i]);
+    }
+    currentLine = currentLine ? words[i] : "";
+
+    if (lines.length >= maxLines) {
+      break;
     }
   }
 
-  if (line && lines < maxLines) {
-    ctx.fillText(line, x, y);
+  if (currentLine && lines.length < maxLines) {
+    lines.push(currentLine);
   }
+
+  if (lines.length === maxLines && words.length > 0) {
+    let lastLine = lines[maxLines - 1];
+    while (ctx.measureText(`${lastLine}...`).width > maxWidth && lastLine.length > 0) {
+      lastLine = lastLine.slice(0, -1);
+    }
+    lines[maxLines - 1] = `${lastLine}...`;
+  }
+
+  return lines;
+}
+
+function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
+  const lines = wrapLines(ctx, text, maxWidth, maxLines);
+  for (let i = 0; i < lines.length; i += 1) {
+    ctx.fillText(lines[i], x, y + i * lineHeight);
+  }
+  return y + lines.length * lineHeight;
 }
 
 function drawCoverImage(ctx, image, width, height, alpha = 1) {
@@ -112,40 +142,91 @@ export async function buildShareCard(canvas, verse, language, appearance = "dark
     ctx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
   }
 
-  ctx.fillStyle = "rgba(214, 178, 94, 0.2)";
-  ctx.beginPath();
-  ctx.arc(CARD_WIDTH * 0.8, CARD_HEIGHT * 0.2, 140, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.strokeStyle = "rgba(214, 178, 94, 0.5)";
-  ctx.lineWidth = 3;
-  ctx.strokeRect(40, 40, CARD_WIDTH - 80, CARD_HEIGHT - 80);
-
   const textPrimary = appearance === "light" ? "#1f2d44" : "#f4e2ba";
   const textSecondary = appearance === "light" ? "rgba(24,32,48,0.9)" : "rgba(255,255,255,0.92)";
   const textBody = appearance === "light" ? "rgba(22,30,44,0.95)" : "rgba(255,255,255,0.95)";
   const textAccent = appearance === "light" ? "rgba(146,104,28,0.95)" : "rgba(214,178,94,0.95)";
+  const panelFill = appearance === "light" ? "rgba(248,242,225,0.78)" : "rgba(5,9,24,0.62)";
+  const borderStroke = appearance === "light" ? "rgba(155,113,45,0.62)" : "rgba(214,178,94,0.56)";
+
+  ctx.fillStyle = "rgba(214, 178, 94, 0.16)";
+  ctx.beginPath();
+  ctx.arc(CARD_WIDTH * 0.82, CARD_HEIGHT * 0.18, 132, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = panelFill;
+  ctx.strokeStyle = borderStroke;
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  if (typeof ctx.roundRect === "function") {
+    ctx.roundRect(56, 56, CARD_WIDTH - 112, CARD_HEIGHT - 112, 26);
+    ctx.fill();
+    ctx.stroke();
+  } else {
+    ctx.fillRect(56, 56, CARD_WIDTH - 112, CARD_HEIGHT - 112);
+    ctx.strokeRect(56, 56, CARD_WIDTH - 112, CARD_HEIGHT - 112);
+  }
 
   ctx.fillStyle = textPrimary;
-  ctx.font = "600 42px Cinzel, Georgia, serif";
-  ctx.fillText("GitaPath", 80, 110);
+  ctx.font = "600 46px Cinzel, Georgia, serif";
+  ctx.fillText("GitaPath", 96, 126);
 
   ctx.fillStyle = textSecondary;
-  ctx.font = "500 28px Cinzel, Georgia, serif";
-  ctx.fillText(`Chapter ${verse.chapter}, Verse ${verse.verse}`, 80, 170);
+  ctx.font = "500 27px Cinzel, Georgia, serif";
+  ctx.fillText(`Chapter ${verse.chapter} \u2022 Verse ${verse.verse}`, 96, 176);
+
+  let cursorY = 248;
+  const contentX = 96;
+  const contentWidth = CARD_WIDTH - 192;
 
   ctx.fillStyle = textPrimary;
-  ctx.font = "500 36px 'Nirmala UI', serif";
-  drawWrappedText(ctx, verse.sanskrit, 80, 250, 920, 56, 8);
+  ctx.font = "500 50px 'Nirmala UI', serif";
+  cursorY = drawWrappedText(ctx, verse.sanskrit, contentX, cursorY, contentWidth, 62, 4);
+  cursorY += 16;
+
+  ctx.fillStyle = textSecondary;
+  ctx.font = "italic 400 33px Georgia, serif";
+  cursorY = drawWrappedText(ctx, verse.transliteration, contentX, cursorY, contentWidth, 46, 2);
+  cursorY += 16;
+
+  ctx.strokeStyle = borderStroke;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(contentX, cursorY);
+  ctx.lineTo(contentX + contentWidth, cursorY);
+  ctx.stroke();
+  cursorY += 36;
 
   const meaning = language === "hi" ? verse.hindiMeaning : verse.englishMeaning;
-  ctx.fillStyle = textBody;
-  ctx.font = "400 30px Georgia, serif";
-  drawWrappedText(ctx, meaning, 80, 680, 920, 42, 7);
+  const reflection = language === "hi"
+    ? normalizeText(verse.hindiReflection || verse.reflection)
+    : normalizeText(verse.reflection);
 
   ctx.fillStyle = textAccent;
-  ctx.font = "400 24px Cinzel, Georgia, serif";
-  ctx.fillText("Daily verse. Daily reflection. Daily alignment.", 80, 980);
+  ctx.font = "600 26px Cinzel, Georgia, serif";
+  ctx.fillText(language === "hi" ? "Arth" : "Meaning", contentX, cursorY);
+  cursorY += 42;
+
+  ctx.fillStyle = textBody;
+  ctx.font = "400 38px Georgia, serif";
+  cursorY = drawWrappedText(ctx, meaning, contentX, cursorY, contentWidth, 52, 5);
+  cursorY += 20;
+
+  ctx.fillStyle = textAccent;
+  ctx.font = "600 26px Cinzel, Georgia, serif";
+  ctx.fillText(language === "hi" ? "Manan" : "Reflection", contentX, cursorY);
+  cursorY += 40;
+
+  ctx.fillStyle = textSecondary;
+  ctx.font = "400 32px Georgia, serif";
+  drawWrappedText(ctx, reflection, contentX, cursorY, contentWidth, 46, 3);
+
+  ctx.fillStyle = textAccent;
+  ctx.font = "500 24px Cinzel, Georgia, serif";
+  ctx.fillText("Daily verse. Daily reflection. Daily alignment.", 96, 964);
+  ctx.font = "400 19px Georgia, serif";
+  ctx.fillStyle = textSecondary;
+  ctx.fillText("srma4tech.github.io/gitapath", 96, 996);
 
   return new Promise((resolve) => {
     canvas.toBlob((blob) => resolve(blob), "image/png");

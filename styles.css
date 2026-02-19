@@ -146,6 +146,8 @@ body.theme-light .site-header #install-btn {
 .sanskrit-text {
   font-family: "Nirmala UI", "Mangal", "Kokila", serif;
   letter-spacing: 0.01em;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 #welcome-screen {
@@ -194,19 +196,25 @@ body.theme-light #daily-screen {
 #verse-sanskrit {
   line-height: 1.65;
   letter-spacing: 0.01em;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 #verse-translit {
   line-height: 1.75;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 #verse-meaning {
   line-height: 1.75;
   letter-spacing: 0.002em;
+  overflow-wrap: anywhere;
 }
 
 #verse-reflection {
   line-height: 1.8;
+  overflow-wrap: anywhere;
 }
 
 .reading-content h2 {
@@ -358,32 +366,134 @@ body.theme-dark .section-kicker {
   50% { transform: scale(1.05); opacity: 0.75; }
 }
 
+@media (max-width: 900px) {
+  .site-header-actions {
+    align-items: flex-end;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+
+  .site-header-actions nav {
+    gap: 0.55rem;
+  }
+}
+
 @media (max-width: 640px) {
   .site-header {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+    gap: 0.8rem;
+    padding: 0.75rem 0.85rem;
   }
 
   .site-header-top {
     width: 100%;
     flex-direction: column;
-    justify-content: center;
+    align-items: flex-start;
+    justify-content: flex-start;
     text-align: center;
+    gap: 0.65rem;
   }
 
   .site-header-actions {
-    align-items: center;
+    width: 100%;
+    align-items: stretch;
     flex-direction: column;
-    gap: 0.45rem;
+    gap: 0.6rem;
   }
 
   .site-header-actions nav {
-    justify-content: center;
+    justify-content: flex-start;
+    row-gap: 0.45rem;
+  }
+
+  .site-header #install-btn {
+    width: 100%;
+  }
+
+  .page-title {
+    font-size: 0.8rem;
+    line-height: 1.35;
+  }
+
+  #daily-screen {
+    border-radius: 1rem;
+    padding: 0.35rem;
   }
 
   #verse-card {
     min-height: 0;
+    padding: 1rem !important;
+    border-radius: 1rem;
+  }
+
+  #verse-card > div:first-child,
+  #verse-card > div:nth-of-type(2) {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  #verse-meta {
+    width: 100%;
+    margin-bottom: 0.2rem;
+  }
+
+  #verse-sanskrit {
+    font-size: 1.38rem !important;
+    line-height: 1.55;
+  }
+
+  #verse-translit {
+    font-size: 0.95rem !important;
+    line-height: 1.6;
+  }
+
+  #verse-meaning {
+    font-size: 1rem !important;
+    line-height: 1.7;
+  }
+
+  #verse-reflection {
+    font-size: 0.95rem !important;
+    line-height: 1.7;
+    padding: 0.85rem;
+  }
+
+  .control-chip {
+    min-width: 6.2rem;
+    min-height: 2.1rem;
+    font-size: 0.76rem !important;
+    padding: 0.3rem 0.65rem !important;
+  }
+
+  #share-btn,
+  #download-btn {
+    flex: 1 1 auto;
+    min-width: 9.5rem;
+    text-align: center;
+  }
+}
+
+@media (max-width: 420px) {
+  .site-header h1 {
+    font-size: 1.85rem !important;
+  }
+
+  .site-header-actions nav {
+    font-size: 0.78rem;
+    gap: 0.5rem;
+  }
+
+  #verse-sanskrit {
+    font-size: 1.26rem !important;
+  }
+
+  .control-chip {
+    min-width: 5.7rem;
+    font-size: 0.72rem !important;
+  }
+
+  #share-btn,
+  #download-btn {
+    width: 100%;
   }
 }
 
