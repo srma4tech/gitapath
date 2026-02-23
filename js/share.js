@@ -139,7 +139,7 @@ async function loadImageFromDataUrl(dataUrl) {
   });
 }
 
-export async function buildShareCard(canvas, verse, language, appearance = "dark", profile = null, reflectionOverride = "") {
+export async function buildShareCard(canvas, verse, language, appearance = "dark", profile = null, reflectionOverride = "", meaningOverride = "") {
   const ctx = canvas.getContext("2d");
   canvas.width = CARD_WIDTH;
   canvas.height = CARD_HEIGHT;
@@ -220,7 +220,7 @@ export async function buildShareCard(canvas, verse, language, appearance = "dark
   const contentTop = 248;
   const maxContentBottom = 900;
 
-  const meaning = language === "hi" ? verse.hindiMeaning : verse.englishMeaning;
+  const meaning = normalizeText(meaningOverride) || (language === "hi" ? verse.hindiMeaning : verse.englishMeaning);
   const reflection = normalizeText(reflectionOverride) || (language === "hi"
     ? normalizeText(verse.hindiReflection || verse.reflection)
     : normalizeText(verse.reflection));
@@ -392,7 +392,7 @@ export async function buildShareCard(canvas, verse, language, appearance = "dark
   });
 }
 
-export async function shareVerseImage(blob, verse, language) {
+export async function shareVerseImage(blob, verse, language, meaningOverride = "") {
   if (!blob || blob.size === 0) {
     return "failed";
   }
@@ -409,7 +409,7 @@ export async function shareVerseImage(blob, verse, language) {
     }
   })();
   const linkLabel = language === "hi" ? "\u0917\u0940\u0924\u093e\u092a\u0925 \u0932\u093f\u0902\u0915" : "GitaPath link";
-  const meaningText = language === "hi" ? verse.hindiMeaning : verse.englishMeaning;
+  const meaningText = normalizeText(meaningOverride) || (language === "hi" ? verse.hindiMeaning : verse.englishMeaning);
   const shareInvite = language === "hi"
     ? `\u0930\u094b\u091c\u093c \u090f\u0915 \u0917\u0940\u0924\u093e \u0936\u094d\u0932\u094b\u0915 \u092a\u0922\u093c\u0947\u0902, \u0905\u0930\u094d\u0925 \u0914\u0930 \u091a\u093f\u0902\u0924\u0928 \u0915\u0947 \u0938\u093e\u0925\u0964`
     : "Read one Bhagavad Gita verse daily with meaning and reflection.";

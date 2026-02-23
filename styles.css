@@ -693,10 +693,33 @@ body.theme-light #settings-card button.bg-gp-gold {
   color-scheme: dark;
 }
 
+#settings-card #lang-select {
+  color-scheme: dark;
+  background: rgba(16, 22, 36, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #f7edd6;
+}
+
+#settings-card #lang-select option {
+  background-color: #101624;
+  color: #f7edd6;
+}
+
 body.theme-light #settings-card input[type="text"],
 body.theme-light #settings-card input[type="time"] {
   background: rgba(23, 30, 45, 0.55);
   border-color: rgba(255, 227, 164, 0.35);
+  color: #f7edd6;
+}
+
+body.theme-light #settings-card #lang-select {
+  background: rgba(23, 30, 45, 0.55);
+  border-color: rgba(255, 227, 164, 0.35);
+  color: #f7edd6;
+}
+
+body.theme-light #settings-card #lang-select option {
+  background-color: #1a2336;
   color: #f7edd6;
 }
 

@@ -9,6 +9,7 @@ const appearanceKey = "gitapath_appearance";
 const profileKey = "gitapath_profile";
 const reminderKey = "gitapath_reminder";
 const reminderLastSentKey = "gitapath_reminder_last_sent";
+const voicePromptSeenPrefix = "gitapath_voice_prompt_seen_v1_";
 const appFallbackUrl = "https://srma4tech.github.io/gitapath/";
 
 const welcomeScreen = document.getElementById("welcome-screen");
@@ -17,8 +18,8 @@ const startButton = document.getElementById("start-btn");
 const installButton = document.getElementById("install-btn");
 const shareAppButton = document.getElementById("share-app-btn");
 const headerShareStatus = document.getElementById("header-share-status");
-const langEnButton = document.getElementById("lang-en");
-const langHiButton = document.getElementById("lang-hi");
+const langSelect = document.getElementById("lang-select");
+const translationStatus = document.getElementById("translation-status");
 const themeDarkButton = document.getElementById("theme-dark");
 const themeLightButton = document.getElementById("theme-light");
 const shareButton = document.getElementById("share-btn");
@@ -42,6 +43,11 @@ const reminderTimeInput = document.getElementById("reminder-time");
 const saveReminderButton = document.getElementById("save-reminder-btn");
 const testReminderButton = document.getElementById("test-reminder-btn");
 const reminderStatus = document.getElementById("reminder-status");
+const voiceModal = document.getElementById("voice-modal");
+const voiceModalOverlay = document.getElementById("voice-modal-overlay");
+const voiceModalClose = document.getElementById("voice-modal-close");
+const voiceModalOk = document.getElementById("voice-modal-ok");
+const voiceModalText = document.getElementById("voice-modal-text");
 
 const requiredElements = [
   ["welcome-screen", welcomeScreen],
@@ -50,8 +56,8 @@ const requiredElements = [
   ["install-btn", installButton],
   ["share-app-btn", shareAppButton],
   ["header-share-status", headerShareStatus],
-  ["lang-en", langEnButton],
-  ["lang-hi", langHiButton],
+  ["lang-select", langSelect],
+  ["translation-status", translationStatus],
   ["theme-dark", themeDarkButton],
   ["theme-light", themeLightButton],
   ["share-btn", shareButton],
@@ -74,7 +80,12 @@ const requiredElements = [
   ["reminder-time", reminderTimeInput],
   ["save-reminder-btn", saveReminderButton],
   ["test-reminder-btn", testReminderButton],
-  ["reminder-status", reminderStatus]
+  ["reminder-status", reminderStatus],
+  ["voice-modal", voiceModal],
+  ["voice-modal-overlay", voiceModalOverlay],
+  ["voice-modal-close", voiceModalClose],
+  ["voice-modal-ok", voiceModalOk],
+  ["voice-modal-text", voiceModalText]
 ];
 
 const chapterReflectionFocusHi = {
@@ -98,11 +109,43 @@ const chapterReflectionFocusHi = {
   18: "\u091c\u094d\u091e\u093e\u0928, \u0915\u0930\u094d\u092e \u0914\u0930 \u092d\u0915\u094d\u0924\u093f \u0915\u093e \u0938\u092e\u0928\u094d\u0935\u092f"
 };
 
-let language = localStorage.getItem(languageKey) || "en";
+const languageConfig = {
+  en: { speechLang: "en-IN", translateTarget: "en", name: "English" },
+  as: { speechLang: "as-IN", translateTarget: "as", name: "Assamese" },
+  bn: { speechLang: "bn-IN", translateTarget: "bn", name: "Bengali" },
+  brx: { speechLang: "en-IN", translateTarget: "brx", name: "Bodo" },
+  doi: { speechLang: "hi-IN", translateTarget: "doi", name: "Dogri" },
+  gu: { speechLang: "gu-IN", translateTarget: "gu", name: "Gujarati" },
+  hi: { speechLang: "hi-IN", translateTarget: "hi", name: "Hindi" },
+  kn: { speechLang: "kn-IN", translateTarget: "kn", name: "Kannada" },
+  ks: { speechLang: "ur-IN", translateTarget: "ks", name: "Kashmiri" },
+  kok: { speechLang: "kok-IN", translateTarget: "gom", name: "Konkani" },
+  mai: { speechLang: "hi-IN", translateTarget: "mai", name: "Maithili" },
+  ml: { speechLang: "ml-IN", translateTarget: "ml", name: "Malayalam" },
+  mni: { speechLang: "bn-IN", translateTarget: "mni-Mtei", name: "Manipuri" },
+  mr: { speechLang: "mr-IN", translateTarget: "mr", name: "Marathi" },
+  ne: { speechLang: "ne-IN", translateTarget: "ne", name: "Nepali" },
+  or: { speechLang: "or-IN", translateTarget: "or", name: "Odia" },
+  pa: { speechLang: "pa-IN", translateTarget: "pa", name: "Punjabi" },
+  sa: { speechLang: "hi-IN", translateTarget: "sa", name: "Sanskrit" },
+  sat: { speechLang: "hi-IN", translateTarget: "sat", name: "Santali" },
+  sd: { speechLang: "ur-IN", translateTarget: "sd", name: "Sindhi" },
+  ta: { speechLang: "ta-IN", translateTarget: "ta", name: "Tamil" },
+  te: { speechLang: "te-IN", translateTarget: "te", name: "Telugu" },
+  ur: { speechLang: "ur-IN", translateTarget: "ur", name: "Urdu" }
+};
+const translationCache = new Map();
+
+function getSafeLanguage(code) {
+  return languageConfig[code] ? code : "en";
+}
+
+let language = getSafeLanguage(localStorage.getItem(languageKey) || "en");
 let appearance = localStorage.getItem(appearanceKey) || "dark";
 let todayVerse = null;
 let activeSpeechTarget = null;
 let reminderTimeoutId = null;
+let renderVersion = 0;
 
 function normalizeText(value) {
   return String(value || "").replace(/\s+/g, " ").trim();
@@ -124,6 +167,10 @@ function setSpeechStatus(message) {
   speechStatus.textContent = message;
 }
 
+function setTranslationStatus(message) {
+  translationStatus.textContent = message;
+}
+
 function getAppUrl() {
   try {
     return new URL("./", window.location.href).href;
@@ -132,18 +179,132 @@ function getAppUrl() {
   }
 }
 
-function applyLanguageToggleUi() {
-  if (language === "hi") {
-    langHiButton.className = "rounded-full px-4 py-1.5 text-sm bg-gp-gold text-[#1f1908]";
-    langEnButton.className = "rounded-full px-4 py-1.5 text-sm text-white/85";
-    langHiButton.setAttribute("aria-pressed", "true");
-    langEnButton.setAttribute("aria-pressed", "false");
-  } else {
-    langEnButton.className = "rounded-full px-4 py-1.5 text-sm bg-gp-gold text-[#1f1908]";
-    langHiButton.className = "rounded-full px-4 py-1.5 text-sm text-white/85";
-    langEnButton.setAttribute("aria-pressed", "true");
-    langHiButton.setAttribute("aria-pressed", "false");
+function getVoicePromptKey(langCode) {
+  return `${voicePromptSeenPrefix}${langCode}`;
+}
+
+function markVoicePromptSeen(langCode) {
+  localStorage.setItem(getVoicePromptKey(langCode), "true");
+}
+
+function hasSeenVoicePrompt(langCode) {
+  return localStorage.getItem(getVoicePromptKey(langCode)) === "true";
+}
+
+function getLanguageDisplayName(langCode) {
+  return languageConfig[langCode]?.name || "Selected";
+}
+
+function getPreferredSpeechLang(langCode) {
+  return languageConfig[langCode]?.speechLang || "en-IN";
+}
+
+function closeVoiceModal() {
+  voiceModal.classList.add("hidden");
+  voiceModalOverlay.classList.add("hidden");
+  voiceModalOverlay.setAttribute("aria-hidden", "true");
+}
+
+function openVoiceModal(message, langCode) {
+  voiceModalText.textContent = message;
+  voiceModal.classList.remove("hidden");
+  voiceModalOverlay.classList.remove("hidden");
+  voiceModalOverlay.setAttribute("aria-hidden", "false");
+  markVoicePromptSeen(langCode);
+}
+
+async function getAvailableVoices() {
+  if (!("speechSynthesis" in window)) {
+    return [];
   }
+
+  const initial = window.speechSynthesis.getVoices();
+  if (initial.length > 0) {
+    return initial;
+  }
+
+  return new Promise((resolve) => {
+    let done = false;
+    const finish = () => {
+      if (done) {
+        return;
+      }
+      done = true;
+      window.speechSynthesis.removeEventListener("voiceschanged", onVoicesChanged);
+      resolve(window.speechSynthesis.getVoices());
+    };
+    const onVoicesChanged = () => finish();
+    window.speechSynthesis.addEventListener("voiceschanged", onVoicesChanged, { once: true });
+    window.setTimeout(finish, 1200);
+  });
+}
+
+function pickBestVoice(langCode, voices) {
+  if (!voices || voices.length === 0) {
+    return null;
+  }
+
+  const preferred = getPreferredSpeechLang(langCode).toLowerCase();
+  const base = preferred.split("-")[0];
+  const byExact = voices.find((voice) => voice.lang.toLowerCase() === preferred);
+  if (byExact) {
+    return byExact;
+  }
+
+  const byStartsWithPreferred = voices.find((voice) => voice.lang.toLowerCase().startsWith(preferred));
+  if (byStartsWithPreferred) {
+    return byStartsWithPreferred;
+  }
+
+  const byBaseIndian = voices.find((voice) => {
+    const voiceLang = voice.lang.toLowerCase();
+    return voiceLang.startsWith(`${base}-`) && voiceLang.includes("-in");
+  });
+  if (byBaseIndian) {
+    return byBaseIndian;
+  }
+
+  const byBase = voices.find((voice) => voice.lang.toLowerCase().startsWith(base));
+  if (byBase) {
+    return byBase;
+  }
+
+  return null;
+}
+
+function hasIndianAccentVoice(langCode, voices) {
+  const preferred = getPreferredSpeechLang(langCode).toLowerCase();
+  const base = preferred.split("-")[0];
+  return voices.some((voice) => {
+    const voiceLang = voice.lang.toLowerCase();
+    return voiceLang.includes("-in") && (voiceLang.startsWith(base) || voiceLang === preferred);
+  });
+}
+
+async function maybePromptForIndianVoice(langCode) {
+  const safeLang = getSafeLanguage(langCode);
+  if (hasSeenVoicePrompt(safeLang)) {
+    return;
+  }
+  if (!("speechSynthesis" in window)) {
+    return;
+  }
+
+  const voices = await getAvailableVoices();
+  if (hasIndianAccentVoice(safeLang, voices)) {
+    return;
+  }
+
+  const languageName = getLanguageDisplayName(safeLang);
+  const locale = getPreferredSpeechLang(safeLang);
+  openVoiceModal(
+    `No ${languageName} Indian voice (${locale}) was found in your browser. Add this local accent for the best pronunciation and listening experience.`,
+    safeLang
+  );
+}
+
+function applyLanguageToggleUi() {
+  langSelect.value = language;
 }
 
 function applyAppearanceUi() {
@@ -173,6 +334,82 @@ function getLocalizedReflection(verse) {
 
   const focus = chapterReflectionFocusHi[verse.chapter] || "\u0915\u0930\u094d\u0924\u0935\u094d\u092f \u0914\u0930 \u0906\u0902\u0924\u0930\u093f\u0915 \u0938\u094d\u0925\u093f\u0930\u0924\u093e";
   return `\u092f\u0939 \u0936\u094d\u0932\u094b\u0915 \u0939\u092e\u0947\u0902 ${focus} \u092a\u0930 \u092e\u0928\u0928 \u0915\u0930\u0928\u0947 \u0915\u0947 \u0932\u093f\u090f \u092a\u094d\u0930\u0947\u0930\u093f\u0924 \u0915\u0930\u0924\u093e \u0939\u0948\u0964 \u0907\u0938\u0947 \u0936\u093e\u0902\u0924\u093f \u0938\u0947 \u092a\u0922\u093c\u0947\u0902, \u0905\u092a\u0928\u0947 \u0935\u0930\u094d\u0924\u092e\u093e\u0928 \u0915\u0930\u094d\u0924\u0935\u094d\u092f \u0915\u094b \u092c\u093f\u0928\u093e \u092d\u092f \u0915\u0947 \u0926\u0947\u0916\u0947\u0902, \u0914\u0930 \u0915\u0930\u094d\u092e \u0915\u094b \u0938\u0947\u0935\u093e-\u092d\u093e\u0935 \u0938\u0947 \u0915\u0930\u0947\u0902\u0964 \u091c\u092c \u0905\u0939\u0902\u0915\u093e\u0930 \u0938\u0947 \u0939\u091f\u0915\u0930 \u0938\u092e\u0930\u094d\u092a\u0923 \u0906\u0924\u093e \u0939\u0948, \u0924\u092c \u0935\u093f\u0935\u0947\u0915, \u0927\u0948\u0930\u094d\u092f \u0914\u0930 \u0906\u0927\u094d\u092f\u093e\u0924\u094d\u092e\u093f\u0915 \u092a\u094d\u0930\u0917\u0924\u093f \u0938\u094d\u0935\u093e\u092d\u093e\u0935\u093f\u0915 \u0930\u0942\u092a \u0938\u0947 \u092c\u0922\u093c\u0924\u0940 \u0939\u0948\u0964`;
+}
+
+async function translateText(sourceText, targetLanguage) {
+  const clean = normalizeText(sourceText);
+  if (!clean) {
+    return "";
+  }
+
+  if (targetLanguage === "en") {
+    return clean;
+  }
+
+  const target = languageConfig[targetLanguage]
+    ? languageConfig[targetLanguage].translateTarget
+    : "en";
+  const cacheKey = `${target}::${clean}`;
+  if (translationCache.has(cacheKey)) {
+    return translationCache.get(cacheKey);
+  }
+
+  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(target)}&dt=t&q=${encodeURIComponent(clean)}`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error("translate request failed");
+    }
+    const payload = await response.json();
+    const translated = Array.isArray(payload?.[0])
+      ? payload[0].map((chunk) => normalizeText(chunk?.[0])).join(" ").trim()
+      : "";
+    if (!translated) {
+      throw new Error("empty translation");
+    }
+    translationCache.set(cacheKey, translated);
+    return translated;
+  } catch (error) {
+    return "";
+  }
+}
+
+async function getLocalizedVerseContent(verse, targetLanguage) {
+  const activeLanguage = getSafeLanguage(targetLanguage);
+  const englishMeaning = normalizeText(verse.englishMeaning);
+  const englishReflection = normalizeText(verse.reflection);
+
+  if (activeLanguage === "hi") {
+    return {
+      meaning: normalizeText(verse.hindiMeaning),
+      reflection: getLocalizedReflection(verse),
+      translated: true
+    };
+  }
+
+  if (activeLanguage === "en") {
+    return {
+      meaning: englishMeaning,
+      reflection: englishReflection,
+      translated: true
+    };
+  }
+
+  const [meaning, reflection] = await Promise.all([
+    translateText(englishMeaning, activeLanguage),
+    translateText(englishReflection, activeLanguage)
+  ]);
+
+  if (meaning && reflection) {
+    return { meaning, reflection, translated: true };
+  }
+
+  return {
+    meaning: englishMeaning,
+    reflection: englishReflection,
+    translated: false
+  };
 }
 
 function readProfileFromStorage() {
@@ -348,9 +585,7 @@ function speakText(text, langCode, target) {
   utterance.lang = langCode;
 
   const voices = window.speechSynthesis.getVoices();
-  const matchingVoice = voices.find((voice) =>
-    voice.lang.toLowerCase().startsWith(langCode.toLowerCase().slice(0, 2))
-  );
+  const matchingVoice = pickBestVoice(language, voices) || pickBestVoice(langCode.slice(0, 2), voices);
   if (matchingVoice) {
     utterance.voice = matchingVoice;
   }
@@ -373,18 +608,36 @@ function speakText(text, langCode, target) {
   window.speechSynthesis.speak(utterance);
 }
 
-function renderVerse() {
+async function renderVerse() {
   if (!todayVerse) {
     return;
   }
 
+  const localRenderVersion = renderVersion + 1;
+  renderVersion = localRenderVersion;
+
   verseMeta.textContent = `Chapter ${todayVerse.chapter} - Verse ${todayVerse.verse}`;
   verseSanskrit.textContent = normalizeText(todayVerse.sanskrit);
   verseTranslit.textContent = normalizeText(todayVerse.transliteration);
-  verseMeaning.textContent = language === "hi"
-    ? normalizeText(todayVerse.hindiMeaning)
-    : normalizeText(todayVerse.englishMeaning);
-  verseReflection.textContent = getLocalizedReflection(todayVerse);
+
+  if (language !== "en" && language !== "hi") {
+    setTranslationStatus(`Translating to ${languageConfig[language]?.name || "selected language"}...`);
+  } else {
+    setTranslationStatus("");
+  }
+
+  const content = await getLocalizedVerseContent(todayVerse, language);
+  if (localRenderVersion !== renderVersion) {
+    return;
+  }
+
+  verseMeaning.textContent = content.meaning;
+  verseReflection.textContent = content.reflection;
+  if (language !== "en" && language !== "hi" && !content.translated) {
+    setTranslationStatus("Automatic translation is unavailable right now. Showing English text.");
+  } else if (language !== "en" && language !== "hi") {
+    setTranslationStatus(`${languageConfig[language]?.name || "Selected language"} translation ready.`);
+  }
 }
 
 function renderStreak() {
@@ -418,20 +671,22 @@ function setupShareButtons() {
       return;
     }
 
+    const content = await getLocalizedVerseContent(todayVerse, language);
     const blob = await buildShareCard(
       shareCanvas,
       todayVerse,
       language,
       appearance,
       getProfileForShare(),
-      getLocalizedReflection(todayVerse)
+      content.reflection,
+      content.meaning
     );
     if (!blob) {
       setShareStatus("Could not prepare share card right now.");
       return;
     }
 
-    const shareResult = await shareVerseImage(blob, todayVerse, language).catch(() => "failed");
+    const shareResult = await shareVerseImage(blob, todayVerse, language, content.meaning).catch(() => "failed");
     if (shareResult === "shared") {
       setShareStatus("Shared successfully.");
       return;
@@ -452,13 +707,15 @@ function setupShareButtons() {
       return;
     }
 
+    const content = await getLocalizedVerseContent(todayVerse, language);
     const blob = await buildShareCard(
       shareCanvas,
       todayVerse,
       language,
       appearance,
       getProfileForShare(),
-      getLocalizedReflection(todayVerse)
+      content.reflection,
+      content.meaning
     );
     if (!blob) {
       setShareStatus("Could not prepare download card right now.");
@@ -569,19 +826,13 @@ function setupShareAppButton() {
   });
 }
 
-function setupLanguageButtons() {
-  langEnButton.addEventListener("click", () => {
-    language = "en";
+function setupLanguageSelector() {
+  langSelect.addEventListener("change", () => {
+    language = getSafeLanguage(langSelect.value);
     localStorage.setItem(languageKey, language);
     applyLanguageToggleUi();
     renderVerse();
-  });
-
-  langHiButton.addEventListener("click", () => {
-    language = "hi";
-    localStorage.setItem(languageKey, language);
-    applyLanguageToggleUi();
-    renderVerse();
+    maybePromptForIndianVoice(language);
   });
 }
 
@@ -604,19 +855,27 @@ function setupSpeechButtons() {
     if (!todayVerse) {
       return;
     }
-    speakText(todayVerse.sanskrit, "hi-IN", "shloka");
+    const speechLang = languageConfig[language]?.speechLang || "hi-IN";
+    speakText(todayVerse.sanskrit, speechLang, "shloka");
   });
 
-  speakDescButton.addEventListener("click", () => {
+  speakDescButton.addEventListener("click", async () => {
     if (!todayVerse) {
       return;
     }
-    const meaning = language === "hi" ? todayVerse.hindiMeaning : todayVerse.englishMeaning;
-    const reflection = getLocalizedReflection(todayVerse);
-    speakText(`${meaning}. ${reflection}`, language === "hi" ? "hi-IN" : "en-IN", "desc");
+    const speechLang = languageConfig[language]?.speechLang || "en-IN";
+    const content = await getLocalizedVerseContent(todayVerse, language);
+    speakText(`${content.meaning}. ${content.reflection}`, speechLang, "desc");
   });
 
   window.addEventListener("beforeunload", stopSpeech);
+}
+
+function setupVoiceModal() {
+  const close = () => closeVoiceModal();
+  voiceModalClose.addEventListener("click", close);
+  voiceModalOk.addEventListener("click", close);
+  voiceModalOverlay.addEventListener("click", close);
 }
 
 async function boot() {
@@ -631,9 +890,10 @@ async function boot() {
   registerServiceWorker();
   setupInstallPrompt(installButton);
   setupShareAppButton();
-  setupLanguageButtons();
+  setupLanguageSelector();
   setupAppearanceButtons();
   setupSpeechButtons();
+  setupVoiceModal();
   setupShareButtons();
   setupReminderControls();
   applyLanguageToggleUi();
@@ -643,6 +903,7 @@ async function boot() {
   const verses = await loadVerses();
   todayVerse = getVerseForDate(verses, new Date());
   renderVerse();
+  maybePromptForIndianVoice(language);
   renderStreak();
 
   if (localStorage.getItem(startedKey) === "true") {

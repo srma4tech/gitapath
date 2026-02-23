@@ -122,6 +122,18 @@
       </div>
       <p id="reminder-status" role="status" aria-live="polite" class="reminder-status mt-2 text-xs text-white/70"></p>
     </aside>
+    <div id="voice-modal-overlay" class="menu-modal-overlay hidden" aria-hidden="true"></div>
+    <aside id="voice-modal" class="menu-modal reminder-modal hidden" role="dialog" aria-modal="true" aria-label="Voice recommendation">
+      <button id="voice-modal-close" type="button" class="menu-close-btn" aria-label="Close voice recommendation">X</button>
+      <h2 class="reminder-title text-xl text-gp-goldSoft">Voice Recommendation</h2>
+      <p id="voice-modal-text" class="reminder-subtitle mt-2 text-sm text-white/85"></p>
+      <p class="mt-2 text-xs text-white/70">
+        For best experience, add an Indian voice in your browser or device Text-to-Speech settings, then reopen GitaPath.
+      </p>
+      <div class="reminder-actions mt-4 flex flex-wrap items-center gap-2">
+        <button id="voice-modal-ok" type="button" class="rounded-full border border-gp-gold/45 bg-black/20 px-3 py-1.5 text-xs text-gp-goldSoft hover:bg-black/35">Understood</button>
+      </div>
+    </aside>
 
     <section id="welcome-screen" aria-labelledby="welcome-title" class="rounded-3xl border border-white/10 bg-black/30 p-6 shadow-card backdrop-blur-md animate-fadeIn">
       <h2 id="welcome-title" class="mb-2 text-2xl font-semibold text-gp-goldSoft">Welcome to your daily Gita journey</h2>
@@ -130,9 +142,30 @@
       </p>
       <ul class="mb-5 list-disc space-y-1 pl-5 text-sm text-white/85">
         <li>Daily Sanskrit verse and transliteration.</li>
-        <li>Hindi and English meaning toggle.</li>
+        <li>Indian language dropdown with translated meaning and reflection.</li>
         <li>Spiritual streak milestones to build consistency.</li>
       </ul>
+      <div class="mb-5 rounded-2xl border border-gp-gold/35 bg-gp-gold/10 p-4 text-sm text-white/85">
+        <p class="text-xs uppercase tracking-wider text-gp-goldSoft">Best Voice Experience</p>
+        <p class="mt-2">
+          For natural Indian pronunciation, install an Indian Text-to-Speech voice for your selected language (for example:
+          <span class="text-gp-goldSoft">Hindi - hi-IN</span>,
+          <span class="text-gp-goldSoft">Tamil - ta-IN</span>,
+          <span class="text-gp-goldSoft">Telugu - te-IN</span>).
+        </p>
+        <p class="mt-3 text-xs uppercase tracking-wider text-gp-goldSoft/90">Setup By Platform</p>
+        <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-white/85">
+          <li><span class="text-gp-goldSoft">iPhone (iOS):</span> Settings -> Accessibility -> Spoken Content -> Voices. Download an Indian voice (Hindi/Tamil/Telugu, etc.), then restart Safari.</li>
+          <li><span class="text-gp-goldSoft">Android:</span> Settings -> System -> Languages & input -> Text-to-speech output. Choose Google Speech Services and install Indian voices, then reopen Chrome.</li>
+          <li><span class="text-gp-goldSoft">Windows:</span> Settings -> Time & Language -> Speech -> Manage voices. Add an Indian voice, set it as preferred, then reopen browser.</li>
+          <li><span class="text-gp-goldSoft">macOS:</span> System Settings -> Accessibility -> Spoken Content -> System Voice -> Manage Voices. Download Indian voices and restart Safari/Chrome.</li>
+          <li><span class="text-gp-goldSoft">Linux:</span> Install speech engines/voices (such as Speech Dispatcher/eSpeak NG/voice packages), set locale voice, then reopen browser.</li>
+          <li><span class="text-gp-goldSoft">Other browsers:</span> Chrome/Edge usually expose OS voices best; Firefox support can vary by platform; Safari uses Apple system voices.</li>
+        </ul>
+        <p class="mt-2">
+          After setup, reopen GitaPath and use <span class="text-gp-goldSoft">Shloka</span> or <span class="text-gp-goldSoft">Explain</span>.
+        </p>
+      </div>
       <button id="start-btn" type="button" class="rounded-full bg-gp-gold px-5 py-2.5 font-medium text-[#201a0b] hover:brightness-105">
         Begin Today's Path
       </button>
@@ -152,10 +185,33 @@
 
         <article id="settings-card" class="rounded-2xl border border-white/10 bg-black/30 p-4 backdrop-blur-md">
           <p class="text-xs uppercase tracking-wider text-white/65">Display language</p>
-          <div role="group" aria-label="Display language" class="mt-3 inline-flex rounded-full border border-white/15 p-1">
-            <button id="lang-en" type="button" aria-pressed="true" class="rounded-full px-4 py-1.5 text-sm bg-gp-gold text-[#1f1908]">English</button>
-            <button id="lang-hi" type="button" aria-pressed="false" class="rounded-full px-4 py-1.5 text-sm text-white/85">Hindi</button>
-          </div>
+          <label for="lang-select" class="mt-2 block text-xs text-white/60">Select language</label>
+          <select id="lang-select" aria-label="Display language" class="mt-3 w-full rounded-lg border border-white/20 bg-black/25 px-3 py-2 text-sm text-white">
+            <option value="en">English</option>
+            <option value="as">Assamese</option>
+            <option value="bn">Bengali</option>
+            <option value="brx">Bodo</option>
+            <option value="doi">Dogri</option>
+            <option value="gu">Gujarati</option>
+            <option value="hi">Hindi</option>
+            <option value="kn">Kannada</option>
+            <option value="ks">Kashmiri</option>
+            <option value="kok">Konkani</option>
+            <option value="mai">Maithili</option>
+            <option value="ml">Malayalam</option>
+            <option value="mni">Manipuri</option>
+            <option value="mr">Marathi</option>
+            <option value="ne">Nepali</option>
+            <option value="or">Odia</option>
+            <option value="pa">Punjabi</option>
+            <option value="sa">Sanskrit</option>
+            <option value="sat">Santali</option>
+            <option value="sd">Sindhi</option>
+            <option value="ta">Tamil</option>
+            <option value="te">Telugu</option>
+            <option value="ur">Urdu</option>
+          </select>
+          <p id="translation-status" role="status" aria-live="polite" class="mt-2 text-xs text-white/60"></p>
           <p class="mt-4 text-xs uppercase tracking-wider text-white/65">Appearance</p>
           <div role="group" aria-label="Appearance theme" class="mt-3 inline-flex rounded-full border border-white/15 p-1">
             <button id="theme-dark" type="button" aria-pressed="true" class="rounded-full px-4 py-1.5 text-sm bg-gp-gold text-[#1f1908]">Dark</button>
