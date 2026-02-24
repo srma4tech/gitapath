@@ -440,13 +440,13 @@ function readReminderFromStorage() {
   try {
     const raw = localStorage.getItem(reminderKey);
     if (!raw) {
-      return { enabled: false, time: "06:30" };
+      return { enabled: true, time: "06:00" };
     }
     const parsed = JSON.parse(raw);
-    const time = /^\d{2}:\d{2}$/.test(parsed.time) ? parsed.time : "06:30";
+    const time = /^\d{2}:\d{2}$/.test(parsed.time) ? parsed.time : "06:00";
     return { enabled: Boolean(parsed.enabled), time };
   } catch (error) {
-    return { enabled: false, time: "06:30" };
+    return { enabled: true, time: "06:00" };
   }
 }
 
@@ -750,13 +750,27 @@ function setupReminderControls() {
   const reminder = readReminderFromStorage();
   reminderEnabledInput.checked = reminder.enabled;
   reminderTimeInput.value = reminder.time;
-  scheduleReminderTimer(reminder);
-  maybeSendReminderOnLaunch(reminder);
+
+  const initializeReminder = async () => {
+    let activeReminder = reminder;
+    if (activeReminder.enabled) {
+      const granted = await ensureNotificationPermission();
+      if (!granted) {
+        activeReminder = { ...activeReminder, enabled: false };
+        reminderEnabledInput.checked = false;
+        persistReminder(activeReminder);
+      }
+    }
+    scheduleReminderTimer(activeReminder);
+    maybeSendReminderOnLaunch(activeReminder);
+  };
+
+  initializeReminder();
 
   saveReminderButton.addEventListener("click", async () => {
     const nextReminder = {
       enabled: Boolean(reminderEnabledInput.checked),
-      time: /^\d{2}:\d{2}$/.test(reminderTimeInput.value) ? reminderTimeInput.value : "06:30"
+      time: /^\d{2}:\d{2}$/.test(reminderTimeInput.value) ? reminderTimeInput.value : "06:00"
     };
 
     if (nextReminder.enabled) {
